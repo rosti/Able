@@ -5,6 +5,8 @@ module Able
   # official interface to the program.
   #
   class Project
+    include AbleCommon
+
     attr_reader :root_dir
 
     def initialize args = {}

@@ -1,3 +1,4 @@
+require 'lib/ablecommon.rb'
 require 'lib/abledsl.rb'
 require 'lib/config.rb'
 require 'lib/defconfig.rb'

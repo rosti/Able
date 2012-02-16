@@ -11,7 +11,7 @@ module Able
       rule '.o' => '.c' do
 
         def build input, output
-          system "cc -c -o #{Array(output)[0]} #{Array(input).join ' '}"
+          sh 'cc', '-c', '-o', Array(output)[0], *Array(input)
         end
 
         def describe input, output
@@ -23,7 +23,7 @@ module Able
       rule '' => '.c' do
 
         def build input, output
-          system "cc -o #{Array(output)[0]} #{Array(input).join ' '}"
+          sh 'cc', '-c', '-o', Array(output)[0], *Array(input)
         end
 
         def describe input, output
@@ -36,7 +36,7 @@ module Able
       rule '' => '.o' do
 
         def build input, output
-          system "cc -o #{Array(output)[0]} #{Array(input).join ' '}"
+          sh 'cc', '-o', Array(output)[0], *Array(input)
         end
 
         def describe input, output

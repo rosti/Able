@@ -6,6 +6,8 @@ module Able
   # This class deals with project subdirectories
   #
   class SubDir
+    include AbleCommon
+
     attr_reader :name, :src_path, :dst_path, :project
     attr_accessor :default_target
 

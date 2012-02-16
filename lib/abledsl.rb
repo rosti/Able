@@ -26,7 +26,7 @@ module Able
     def subdir dir_name
       add_subdir dir_name
     rescue
-      puts "Unable to load '#{dir_name}/build.able' file!"
+      log "Unable to load '#{dir_name}/build.able' file!"
       raise
     end
 
@@ -35,7 +35,7 @@ module Able
     # This function takes one String argument that is the description.
     #
     def desc str
-      puts "Warning: Another description detected: '#{@last_desc}'" if @last_desc
+      log "Warning: Another description detected: '#{@last_desc}'" if @last_desc
       @last_desc = str.to_s
     end
 

@@ -5,6 +5,8 @@ module Able
   # These rules can be different on different systems and targets.
   #
   class Configuration
+    include AbleCommon
+
     attr_reader :name
 
     ##

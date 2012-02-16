@@ -14,11 +14,10 @@ module Able
     end
 
     ##
-    # Log arguments to console
+    # Log arguments
     # This function can be overwritten
     #
     def log *args
-      puts args.map(&:to_s).join(' ')
     end
 
   end

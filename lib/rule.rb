@@ -5,6 +5,8 @@ module Able
   # and various other tasks that a rule should be able to handle.
   #
   class Rule
+    include AbleCommon
+
     attr_reader :name, :out_part, :in_part
 
     ##

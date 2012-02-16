@@ -6,6 +6,8 @@ module Able
   # Handle execution and evaluation of tasks
   #
   class Task
+    include AbleCommon
+
     attr_reader :target, :in_files
 
     ##
@@ -85,6 +87,8 @@ module Able
     end
 
     def do_execute
+      log describe
+
       if @handler
         @handler.(@in_files_abs, @target_abs)
       elsif @rule
