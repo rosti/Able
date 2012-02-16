@@ -7,11 +7,10 @@ module Able
   #
   class SubDir
     include AbleCommon
-
-    attr_reader :name, :src_path, :dst_path, :project
-    attr_accessor :default_target
-
     include AbleDSL
+
+    attr_reader :name, :src_path, :dst_path, :project, :dir_task
+    attr_accessor :default_target
 
     def initialize project, parent_dir, name, args = {}
       @project = project
@@ -22,6 +21,7 @@ module Able
       @dst_path = args[:dst_path] ? args[:dst_path] : parent_dir.dst_path.join(name)
       @subdirs = []
       @tasks = []
+      create_dir_task
     end
 
     def get_config
@@ -79,12 +79,28 @@ module Able
 
       task = Task.new( self,
                        in_files: Array(in_files).map(&:to_s), target: out_files.to_s,
-                       rule: rule, handler: block, description: last_desc )
+                       rule: rule, handler: block, description: last_desc,
+                       depends: [@dir_task] )
 
       last_desc = nil
 
       @tasks << task
       @project.add_task task
+    end
+
+    def create_dir_task
+      handler = Proc.new do |in_files, target|
+        puts "assasasasasasasas"
+        Dir.mkdir(target) unless File.exists?(target)
+      end
+
+      parent_dir_task = @parent_dir ? Array(@parent_dir.dir_task) : nil
+
+      @dir_task = Task.new( self, target: '', handler: handler,
+                            description: "Entering directory #{@src_path}",
+                            depends: parent_dir_task )
+      @tasks << @dir_task
+      @project.add_task @dir_task
     end
 
   end
