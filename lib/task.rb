@@ -9,6 +9,7 @@ module Able
     include AbleCommon
 
     attr_reader :target, :in_files
+    attr_reader :target_abs, :in_files_abs
 
     ##
     # Task constructor
@@ -21,6 +22,7 @@ module Able
     # * :rule     => A rule that can handle the task
     # * :handler  => A Proc handler to be executed instead of the rule one
     # * :description => A String describing the task
+    # * :depends  => An Array of tasks (of type Task) that are predefined depends
     #
     def initialize dir, args
       @dir = dir
@@ -31,7 +33,7 @@ module Able
       @rule         = args[:rule]
       @handler      = args[:handler]
       @description  = args[:description]
-      @depends      = []
+      @depends      = args[:depends] || []
       @executed     = false
     end
 
@@ -39,7 +41,7 @@ module Able
     # Return something to identify the target with
     #
     def name
-      @target_abs
+      @dir.prepend(:src_path, @target)[0]
     end
 
     ##
@@ -51,7 +53,8 @@ module Able
     end
 
     def setup_depends
-      @depends = @dir.project.get_tasks_by_name Array(@in_files_abs)
+      depends, @in_files_abs = @dir.project.tasks_and_input_by_name Array(@in_files_abs)
+      @depends += depends
     end
 
     ##

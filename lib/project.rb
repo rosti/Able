@@ -55,8 +55,21 @@ module Able
       @tasks[name].execute
     end
 
-    def get_tasks_by_name names_array
-      @tasks.values_at(*names_array).select { |entry| entry }
+    def tasks_and_input_by_name names_array
+      tasks = []
+      in_files_abs = []
+
+      names_array.each do |name|
+        task = @tasks[name]
+        if task
+          tasks << task
+          in_files_abs << task.target_abs
+        else
+          in_files_abs << name
+        end
+      end
+
+      return tasks, in_files_abs
     end
 
     def bind_tasks
