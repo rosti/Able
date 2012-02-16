@@ -8,11 +8,11 @@ project_options = {}
 parser = OptionParser.new do |opts|
   opts.banner = "Usage: able [options] [targets]"
 
-  opts.on "-C", "--src-dir", "Change source directory" do |value|
+  opts.on "-C", "--src-dir path", "Change source directory" do |value|
     project_options[:src_path] = value
   end
 
-  opts.on "-B", "--build-dir", "Change build directory" do |value|
+  opts.on "-B", "--build-dir path", "Change build directory" do |value|
     project_options[:dst_path] = value
   end
 end
