@@ -52,7 +52,7 @@ module Able
     def build *args, &block
       args.flatten.each do |arg|
         if arg.instance_of? Hash
-          arg.each { |source, target|  create_task target, source, &block }
+          arg.each { |source, target|  create_task source, target, &block }
         else
           create_task arg, nil, &block
         end
@@ -63,11 +63,7 @@ module Able
     # Build a single chaining task
     #
     def task arg, &block
-      if arg.instance_of? Hash
-        create_task *Array(arg)[0], &block
-      else
-        create_task nil, arg, &block
-      end
+      create_task nil, arg, &block
     end
 
     ##
