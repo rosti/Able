@@ -13,12 +13,12 @@ module Able
     # Constructor for Rule objects
     #
     # [name_or_hash] A String or Symbol name of the rule, or a hash
-    #                in the form output_file_pattern => input_file_pattern
+    #                in the form input_file_pattern => output_file_pattern
     #
     def initialize name_or_hash
       @name = name_or_hash.instance_of?(Hash) ? nil : name_or_hash.to_s
-      @out_part = name_or_hash.instance_of?(Hash) ? name_or_hash.to_a[0][0] : nil
-      @in_part = name_or_hash.instance_of?(Hash) ? name_or_hash.to_a[0][1] : nil
+      @out_part = name_or_hash.instance_of?(Hash) ? name_or_hash.to_a[0][1] : nil
+      @in_part = name_or_hash.instance_of?(Hash) ? name_or_hash.to_a[0][0] : nil
     end
 
     ##
@@ -74,6 +74,7 @@ module Able
     # The function takes the same arguments as #build
     #
     def describe input, output
+      "Building: #{input.inspect} => #{output.inspect}"
     end
 
     ##
@@ -81,10 +82,9 @@ module Able
     # This function can be used, for example, to get list of included header files in
     # C or C++ source files.
     #
-    # The function takes one argument that is an array of strings or a string pointing
-    # to source files to be scanned.
+    # The function takes the same arguments as #build
     #
-    def extra_depends input
+    def extra_depends input, output
     end
 
   end

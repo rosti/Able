@@ -84,7 +84,7 @@ module Able
     def need_execution?
       return true if @in_files_abs.empty?
       depends = Set.new @in_files_abs
-      depends |= Array(@rule.extra_depends(@in_files_abs)) if @rule
+      depends |= Array(@rule.extra_depends(@in_files_abs, @target_abs)) if @rule
       depends.any? { |in_file| File.mtime(in_file) > File.mtime(@target_abs) }
     rescue
       true
