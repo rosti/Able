@@ -33,7 +33,7 @@ module Able
       sh cc, cflags, depopts, *infiles, more_flags, '-o', outfile
     end
 
-    def cpp_compile infiles, outfile, more_flags = ''
+    def cxx_compile infiles, outfile, more_flags = ''
       depopts = "-MMD -MP -MF #{depfile_name outfile}"
       cxxflags = '' + String(ENV['CXXFLAGS']) + String(@cxxflags)
       cxx = @cxx || ENV['CXX'] || 'g++'
