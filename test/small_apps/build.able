@@ -1,0 +1,9 @@
+default 'all'
+
+build 'app1.c' => 'app1.exe'
+
+build 'app2.cpp' => 'app2.exe'
+
+task ['app1.exe', 'app2.exe'] => 'all' do
+  puts "All apps built!"
+end
