@@ -52,6 +52,10 @@ module Able
       OBJs.each do |suffix|
         rule '.c' => suffix do
 
+          def extra_depends input, output
+            more_deps input, output
+          end
+
           def build input, output
             c_compile input, output, '-c'
           end
@@ -62,6 +66,10 @@ module Able
       # C to executables
       EXEs.each do |suffix|
         rule '.c' => suffix do
+
+          def extra_depends input, output
+            more_deps input, output
+          end
 
           def build input, output
             c_compile input, output
@@ -74,6 +82,10 @@ module Able
       SOs.each do |suffix|
         rule '.c' => suffix do
 
+          def extra_depends input, output
+            more_deps input, output
+          end
+
           def build input, output
             c_compile input, output, '-shared'
           end
@@ -85,6 +97,10 @@ module Able
       CXXs.each do |in_suffix|
         OBJs.each do |out_suffix|
           rule in_suffix => out_suffix do
+
+            def extra_depends input, output
+              more_deps input, output
+            end
 
             def build input, output
               cxx_compile input, output, '-c'
@@ -99,6 +115,10 @@ module Able
         EXEs.each do |out_suffix|
           rule in_suffix => out_suffix do
 
+            def extra_depends input, output
+              more_deps input, output
+            end
+
             def build input, output
               cxx_compile input, output
             end
@@ -111,6 +131,10 @@ module Able
       CXXs.each do |in_suffix|
         SOs.each do |out_suffix|
           rule in_suffix => out_suffix do
+
+            def extra_depends input, output
+              more_deps input, output
+            end
 
             def build input, output
               cxx_compile input, output, '-shared'

@@ -9,7 +9,7 @@ module Able
       target.chomp(@out_part) + '.d'
     end
 
-    def extra_depends infiles, outfile
+    def more_deps infiles, outfile
       File.read(depfile_name outfile).scan(/^[[:print:]]*\:$/).map { |path| path.chop }
     rescue
     end
