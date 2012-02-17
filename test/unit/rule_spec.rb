@@ -12,27 +12,27 @@ describe Rule, '#matches_by?' do
   end
 
   it 'returns false on a nameless rule' do
-    rule = Rule.new '.o' => '.c'
+    rule = Rule.new '.c' => '.o'
     rule.matches_by?(:name => 'some_name').should be_false
   end
 
   it 'returns true on a input match' do
-    rule = Rule.new '.o' => '.c'
+    rule = Rule.new '.c' => '.o'
     rule.matches_by?(:input => 'main.c').should be_true
   end
 
   it 'returns false on a input missmatch' do
-    rule = Rule.new '.o' => '.c'
+    rule = Rule.new '.c' => '.o'
     rule.matches_by?(:input => 'main.cpp').should be_false
   end
 
   it 'returns false on a output missmatch' do
-    rule = Rule.new '.o' => '.c'
+    rule = Rule.new '.c' => '.o'
     rule.matches_by?(:output => 'main.obj').should be_false
   end
 
   it 'returns true on a output missmatch' do
-    rule = Rule.new '.o' => '.c'
+    rule = Rule.new '.c' => '.o'
     rule.matches_by?(:output => 'main.o').should be_true
   end
 
