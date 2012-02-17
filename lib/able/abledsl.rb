@@ -63,7 +63,11 @@ module Able
     # Build a single chaining task
     #
     def task arg, &block
-      create_task nil, arg, &block
+      if arg.instance_of? Hash
+        create_task *Array(arg)[0], &block
+      else
+        create_task nil, arg, &block
+      end
     end
 
     ##
