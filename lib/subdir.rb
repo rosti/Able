@@ -90,7 +90,6 @@ module Able
 
     def create_dir_task
       handler = Proc.new do |in_files, target|
-        puts "assasasasasasasas"
         Dir.mkdir(target) unless File.exists?(target)
       end
 
