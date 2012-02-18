@@ -46,11 +46,7 @@ module Able
     # This function takes a single argument that is the sorce file name as String
     # 
     def get_target source_name
-      if source_name.end_with? @in_part
-        source_name.sub Regexp.new(Regexp.escape(@in_part) + '\z'), @in_part => @out_part
-      else
-        source_name + @out_part
-      end
+      source_name.chomp(@in_part) + @out_part
     end
 
     # Default 'Do Nothing' action functions
