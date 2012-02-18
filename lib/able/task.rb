@@ -49,7 +49,7 @@ module Able
     #
     def describe
       return @description if @description
-      return @rule.describe(@in_files, @target) if @rule
+      return @rule.describe(@in_files_abs, @target_abs) if @rule
     end
 
     def setup_depends
