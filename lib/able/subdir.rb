@@ -51,18 +51,12 @@ module Able
     def add_subdir dir_name
       dir = SubDir.new @project, self, dir_name
       dir.load_buildable_file 'build.able'
-    rescue
-      raise
-    else
       @subdirs << dir
     end
 
     def create_rule identify, block
       rule = Rule.new identify
       rule.instance_eval &block
-    rescue
-      raise
-    else
       @config << rule
     end
 
