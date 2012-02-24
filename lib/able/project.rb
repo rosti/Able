@@ -37,6 +37,7 @@ module Able
 
     def do_task name = nil
       name = @root_dir.default_target unless name
+      name = @root_dir.prepend(:src_path, name)[0]
       @tasks[name].execute
     end
 
