@@ -1,10 +1,12 @@
+require 'set'
+
 module Able
 
   ##
   # A module that handles logging
   #
   module Logger
-    @@loggers = []
+    @@loggers = Set.new
 
     def self.use_logger logger
       @@loggers << logger
