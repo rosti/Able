@@ -8,5 +8,8 @@ require 'able/rule.rb'
 require 'able/subdir.rb'
 require 'able/task.rb'
 
+# loggers
+require 'able/loggers/console_logger.rb'
+
 # configurations
 require 'able/configs/gcc.rb'

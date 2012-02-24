@@ -12,7 +12,6 @@ module Able
     def initialize args = {}
       @tasks = {}
       @configs = {}
-      @loggers = {}
 
       src_path = Pathname.new(args[:src_path] ? args[:src_path] : '.')
       dst_path = args[:dst_path] ? Pathname.new(args[:dst_path]) : src_path
@@ -30,20 +29,6 @@ module Able
 
     def add_config config
       @configs[config.name] = config
-    end
-
-    def add_logger logger
-      @loggers[logger.name] = logger
-    end
-
-    def use_logger name
-      if name
-        $ABLE_LOGGER = @loggers.fetch name.to_s
-      else
-        $ABLE_LOGGER = nil
-      end
-    rescue
-      raise "Unknown logger: #{name}"
     end
 
     def get_config name

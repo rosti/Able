@@ -200,6 +200,8 @@ module Able
 
     use config: 'default'
 
+    use logger: ConsoleLogger
+
   end
 
 end

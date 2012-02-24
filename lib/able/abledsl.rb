@@ -26,7 +26,7 @@ module Able
     def subdir dir_name
       add_subdir dir_name
     rescue
-      log "Unable to load '#{dir_name}/build.able' file!"
+      Logger.log "Unable to load '#{dir_name}/build.able' file!"
       raise
     end
 
@@ -35,7 +35,7 @@ module Able
     # This function takes one String argument that is the description.
     #
     def desc str
-      log "Warning: Another description detected: '#{@last_desc}'" if @last_desc
+      Logger.log "Warning: Another description detected: '#{@last_desc}'" if @last_desc
       @last_desc = str.to_s
     end
 
@@ -86,16 +86,6 @@ module Able
     end
 
     ##
-    # Register a new logger type
-    # Takes a single argument that is the logger name (in String or Symbol)
-    #
-    def logger name, &block
-      new_logger = Logger.new name
-      new_logger.instance_eval &block if block
-      project.add_logger new_logger
-    end
-
-    ##
     # Setup various aspects of the project environment
     # Takes a hash with the following pair values:
     # [:config] => Configuration name (as String or Symbol)
@@ -103,7 +93,7 @@ module Able
     #
     def use args
       use_config args[:config] if args[:config]
-      project.use_logger args[:logger] if args[:logger]
+      Logger.use_logger args[:logger] if args[:logger]
     end
 
     ##

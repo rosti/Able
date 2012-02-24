@@ -91,7 +91,7 @@ module Able
     end
 
     def do_execute
-      log describe
+      Logger.log describe
 
       if @handler
         @handler.(@in_files_abs, @target_abs)
