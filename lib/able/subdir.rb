@@ -9,8 +9,8 @@ module Able
     include AbleCommon
     include AbleDSL
 
-    attr_reader :name, :src_path, :dst_path, :project, :dir_task
-    attr_accessor :default_target
+    attr_reader :name, :src_path, :project, :dir_task
+    attr_accessor :default_target, :dst_path
 
     def initialize project, parent_dir, name, args = {}
       @project = project

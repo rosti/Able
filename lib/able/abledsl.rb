@@ -102,7 +102,8 @@ module Able
     # If a relative path is given, than the new path is based on the current one.
     #
     def output_dir path
-      dst_path.join path
+      self.dst_path = dst_path.join path
+      self.dir_task.set_target '' # force rebuilding of dir_task target path
     end
 
   end

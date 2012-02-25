@@ -27,14 +27,21 @@ module Able
     def initialize dir, args
       @dir = dir
       @in_files     = args[:in_files]
-      @target       = args[:target]
       @in_files_abs = @dir.prepend(:src_path, args[:in_files] || [])
-      @target_abs   = @dir.prepend(:dst_path, args[:target])[0]
+      set_target args[:target]
       @rule         = args[:rule]
       @handler      = args[:handler]
       @description  = args[:description]
       @depends      = args[:depends] || []
       @executed     = false
+    end
+
+    ##
+    # Setup a new target
+    #
+    def set_target target_path
+      @target = target_path
+      @target_abs = @dir.prepend(:dst_path, target_path)[0]
     end
 
     ##
