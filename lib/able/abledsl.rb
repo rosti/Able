@@ -25,13 +25,14 @@ module Able
     #
     def subdir dir_name
       add_subdir dir_name unless @subdirs.keys.include? dir_name
-      yield dir_name if block_given?
-      @subdirs[dir_name]
     rescue
       unless block_given?
         Logger.log "Unable to load '#{dir_name}/build.able' file!"
         raise
       end
+    ensure
+      yield dir_name if block_given?
+      @subdirs[dir_name]
     end
 
     ##
