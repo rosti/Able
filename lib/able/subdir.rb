@@ -1,4 +1,5 @@
 require 'pathname'
+require 'fileutils'
 
 module Able
 
@@ -84,7 +85,7 @@ module Able
 
     def create_dir_task
       handler = Proc.new do |in_files, target|
-        Dir.mkdir(target) unless File.exists?(target)
+        FileUtils.makedirs target
       end
 
       parent_dir_task = @parent_dir ? Array(@parent_dir.dir_task) : nil
