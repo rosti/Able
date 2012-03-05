@@ -16,18 +16,22 @@ module Able
     # Takes an Array of subdirectory names (as Strings or Symbols) and passes them to
     # the build system for interpretation of build.able files in them.
     #
-    def subdirs *args
-      args.flatten.each { |dir| subdir dir }
+    def subdirs *args, &block
+      args.flatten.each { |dir| subdir dir, &block }
     end
 
     ##
     # Create a subdirectory object by a given subdirectory name (as String or Symbol)
     #
     def subdir dir_name
-      add_subdir dir_name
+      add_subdir dir_name unless @subdirs.keys.include? dir_name
+      yield dir_name if block_given?
+      @subdirs[dir_name]
     rescue
-      Logger.log "Unable to load '#{dir_name}/build.able' file!"
-      raise
+      unless block_given?
+        Logger.log "Unable to load '#{dir_name}/build.able' file!"
+        raise
+      end
     end
 
     ##

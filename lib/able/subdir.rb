@@ -20,7 +20,7 @@ module Able
       @config = parent_dir.get_config if parent_dir
       @src_path = args[:src_path] ? args[:src_path] : parent_dir.src_path.join(name)
       @dst_path = args[:dst_path] ? args[:dst_path] : parent_dir.dst_path.join(name)
-      @subdirs = []
+      @subdirs = {}
       @tasks = []
       create_dir_task
     end
@@ -52,7 +52,7 @@ module Able
     def add_subdir dir_name
       dir = SubDir.new @project, self, dir_name
       dir.load_buildable_file 'build.able'
-      @subdirs << dir
+      @subdirs[dir_name] = dir
     end
 
     def create_rule identify, block
