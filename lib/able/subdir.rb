@@ -85,7 +85,7 @@ module Able
 
     def create_dir_task
       handler = Proc.new do |in_files, target|
-        FileUtils.makedirs target
+        FileUtils.makedirs target unless File.exists? target
       end
 
       parent_dir_task = @parent_dir ? Array(@parent_dir.dir_task) : nil
