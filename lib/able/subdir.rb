@@ -62,18 +62,19 @@ module Able
     end
 
     def create_task in_files, out_files, &block
-      rule = @config.find_rule_by input: Array(in_files)[0], output: Array(out_files)[0]
+      in_files_arr = Array(in_files).flatten
+      rule = @config.find_rule_by input: in_files_arr[0], output: Array(out_files)[0]
 
       if in_files and not out_files
         begin
-          out_files = rule.get_target(Array(in_files)[0])
+          out_files = rule.get_target(in_files_arr[0])
         rescue
           raise 'Anonymous task and no matching rule'
         end
       end
 
       task = Task.new( self,
-                       in_files: Array(in_files).map(&:to_s), target: out_files.to_s,
+                       in_files: in_files_arr.map(&:to_s), target: out_files.to_s,
                        rule: rule, handler: block, description: last_desc,
                        depends: [@dir_task] )
 
