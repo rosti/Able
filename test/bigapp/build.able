@@ -3,4 +3,4 @@ default 'bigapp'
 subdirs 'subd', 'cpp_part'
 
 build 'main.c'
-build ['main.o', 'subd/other.o', 'cpp_part/file.o'] => 'bigapp'
+build tasks('.o') => 'bigapp'
