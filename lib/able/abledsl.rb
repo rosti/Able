@@ -112,6 +112,16 @@ module Able
       self.dir_task.set_target '' # force rebuilding of dir_task target path
     end
 
+    ##
+    # Return a list of all tasks of current directory and subdirectories
+    # Tasks can be filtered by a suffix
+    #
+    def tasks suffix = ''
+      return_tasks = @tasks.map(&:name).select { |task_name| task_name.end_with? suffix }
+      @subdirs.each { |name, subd| return_tasks |= subd.tasks suffix }
+      return_tasks
+    end
+
   end
 
 end
