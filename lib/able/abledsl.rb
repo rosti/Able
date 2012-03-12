@@ -118,7 +118,7 @@ module Able
     #
     def tasks suffix = ''
       return_tasks = @tasks.map(&:name).select { |task_name| task_name.end_with? suffix }
-      @subdirs.each { |name, subd| return_tasks |= subd.tasks suffix }
+      @subdirs.each_value { |subd| return_tasks |= subd.tasks suffix }
       return_tasks
     end
 
