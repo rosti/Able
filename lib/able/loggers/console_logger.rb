@@ -1,3 +1,5 @@
+require 'colorize'
+
 module Able
 
   ##
@@ -5,16 +7,20 @@ module Able
   #
   module ConsoleLogger
 
+    def self.log *args
+      STDOUT.write args.map(&:to_s).join(' ') + "\n"
+    end
+
     def self.info *args
-      puts args.map(&:to_s).join(' ')
+      log "INFO:".green, *args
     end
 
     def self.warn *args
-      puts args.map(&:to_s).join(' ')
+      log "WARNING:".yellow, *args
     end
 
     def self.error *args
-      puts args.map(&:to_s).join(' ')
+      log "ERROR:".red, *args
     end
 
   end
