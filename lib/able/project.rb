@@ -1,66 +1,147 @@
+require 'set'
+require 'thread'
+require 'pathname'
+
 module Able
 
-  ##
-  # A class that handles all project stuff and provides
-  # official interface to the program.
-  #
   class Project
-    include AbleCommon
 
-    attr_reader :root_dir
+    attr_accessor :default_target
+    attr_reader :all_tasks, :src_root, :dst_root
 
-    def initialize args = {}
-      @tasks = {}
-      @configs = {}
+    def initialize(args = {})
+      @all_tasks = {}
+      @rule_sets = []
+      @global_rules = {}
+      @default_target = "all"
+      @threads = args[:threads] || 1
+      @src_root = Pathname.new(args[:src_root] ? args[:src_root] : '.')
+      @dst_root = Pathname.new(args[:dst_root] ? args[:dst_root] : '.')
 
-      src_path = Pathname.new(args[:src_path] ? args[:src_path] : '.')
-      dst_path = args[:dst_path] ? Pathname.new(args[:dst_path]) : src_path
+      Logger.add_logger(ConsoleLogger)
+      load_default_config
 
-      @root_dir = SubDir.new( self, nil, src_path.to_s,
-                              src_path: src_path, dst_path: dst_path )
-
-      @root_dir.instance_eval &ABLE_DEFAULT_CONFIG
-      @root_dir.load_buildable_file 'build.able'
+      @root_dir = Directory.new('.', nil, self, @src_root, @dst_root)
+      @root_dir.load_buildable
     end
 
-    def add_task task
-      @tasks[task.name] = task
+    def add_task(task)
+      task.output_paths.map(&:to_s).each do |target|
+        if @all_tasks[target]
+          raise "Task '#{task}' is duplicting task '#{@all_tasks[target]}' for target '#{target}'"
+        end
+
+        @all_tasks[target] = task
+      end
     end
 
-    def add_config config
-      @configs[config.name] = config
+    def add_rule(name, rule)
+      raise "Global rules cannot contain '_' in their names" if name.to_s.include?("_")
+      global_rules[name] = rule
     end
 
-    def get_config name
-      @configs.fetch name.to_s
+    def find_rule(name, tags)
+      rule = @global_rules[name]
+      raise "No global rule '#{name}'" if tags.include?(:global)
+
+      tag_set = Set.new(tags)
+
+      unless rule
+        @rule_sets.each do |rule_set|
+          rule = rule_set.get_rule(name, tag_set)
+          break if rule
+        end
+
+        raise "No rule named '#{name}', containing tags: '#{tag_set.to_a}'" unless rule
+      end
+
+      rule
     end
 
-    def do_task name = nil
-      name = @root_dir.default_target unless name
-      name = @root_dir.prepend(:src_path, name)[0]
-      @tasks[name].execute
+    def load_config(name)
+      tags = Pathname.new(name.to_s).basename(".able").to_s.split('_')
+      rule_set = RuleSet.new(tags)
+
+      sandbox = ConfigBox(rule_set)
+      sandbox.load_contents(name.to_s)
+
+      @rule_sets.insert(0, rule_set)
     end
 
-    def tasks_and_input_by_name names_array
-      tasks = []
-      in_files_abs = []
+    def load_logger(name)
+      Logger.add_logger(name)
+    end
 
-      names_array.each do |name|
-        task = @tasks[name]
-        if task
-          tasks << task
-          in_files_abs << task.target_abs
-        else
-          in_files_abs << name
+    def build_target(target = nil)
+      target = @default_target unless target
+
+      raise "No task '#{target}', nothing to do!" unless @all_tasks[target]
+
+      build_queue(prepare_queue(target))
+    end
+
+  private
+
+    def load_default_config()
+      rule_set = RuleSet.new([:default])
+
+      sandbox = ConfigBox.new(rule_set)
+      defconfig = File.dirname(__FILE__) + "/defconfig.rb"
+      sandbox.instance_eval(File.read(defconfig), defconfig)
+
+      @rule_sets.insert(0, rule_set)
+    end
+
+    def prepare_queue(target)
+      tasks_queue = [@all_tasks[target]]
+      tasks_queue[0].visit
+      index = 0
+
+      while index < tasks_queue.count
+        task = tasks_queue[index]
+        in_paths = task.input_paths.map(&:to_s)
+        depends = @all_tasks.select { |path, task| in_paths.include?(path) }
+        task.dependencies = depends
+        tasks_queue |= task.dependencies.select { |task| not(task.visited?) }
+        task.dependencies.each(&:visit)
+        index += 1
+      end
+
+      reversed_queue = Queue.new
+      tasks_queue.reverse.each { |task| reversed_queue.push(task) }
+      reversed_queue
+    end
+
+    def build_queue(tasks_queue)
+      continue_work = Atomic.new(true)
+      thread_handles = []
+      @threads.times do
+        thread_handles << Thread.new do
+          begin
+            while continue_work.get
+              task = nil
+              begin
+                task = tasks_queue.pop(true)
+              rescue
+              end
+
+              break unless task
+
+              if task.executable?
+                task.execute
+              else
+                tasks_queue.push(task)
+              end
+            end
+          rescue Exception => ex
+            continue_work.set(false)
+            Logger.error(ex.to_s + "\n" + ex.backtrace.join("\n"))
+          end
         end
       end
 
-      return tasks, in_files_abs
+      thread_handles.each(&:join)
     end
 
-    def bind_tasks
-      @tasks.each_value { |task| task.setup_depends }
-    end
   end
-
 end

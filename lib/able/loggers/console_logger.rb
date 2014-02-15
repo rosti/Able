@@ -5,7 +5,15 @@ module Able
   #
   module ConsoleLogger
 
-    def self.log *args
+    def self.info *args
+      puts args.map(&:to_s).join(' ')
+    end
+
+    def self.warn *args
+      puts args.map(&:to_s).join(' ')
+    end
+
+    def self.error *args
       puts args.map(&:to_s).join(' ')
     end
 

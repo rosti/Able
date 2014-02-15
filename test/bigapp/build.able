@@ -2,5 +2,7 @@ default 'bigapp'
 
 subdirs 'subd', 'cpp_part'
 
-build 'main.c'
-build tasks('.o') => 'bigapp'
+build :ccobj, 'main.c' => 'main.o'
+
+all_objs = project_targets.select { |tgt| tgt.end_with?('.o') }
+build :cxx, all_objs => 'bigapp'

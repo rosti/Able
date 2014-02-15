@@ -1,1 +1,1 @@
-build 'other.c'
+build :ccobj, 'other.c' => 'other.o'

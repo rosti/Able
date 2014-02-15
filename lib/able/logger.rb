@@ -8,11 +8,11 @@ module Able
   module Logger
     @@loggers = Set.new
 
-    def self.use_logger logger
+    def self.add_logger(logger)
       @@loggers << logger
     end
 
-    def self.call_log_method meth, *args, &block
+    def self.call_log_method(meth, *args, &block)
       loggers = @@loggers.select { |logger| logger.methods.include? meth }
       loggers.each { |logger| logger.send meth, *args, &block }
     end
@@ -20,8 +20,16 @@ module Able
     ##
     # Log arguments
     #
-    def self.log *args
-      call_log_method :log, *args
+    def self.info *args
+      call_log_method :info, *args
+    end
+
+    def self.warn *args
+      call_log_method :warn, *args
+    end
+
+    def self.error *args
+      call_log_method :error, *args
     end
 
   end

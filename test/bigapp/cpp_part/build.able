@@ -1,1 +1,1 @@
-build 'file.cpp'
+build :cxxobj, 'file.cpp' => 'file.o'

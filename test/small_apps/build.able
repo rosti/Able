@@ -1,9 +1,9 @@
 default 'all'
 
-build 'app1.c' => 'app1'
+build :cc, 'app1.c' => 'app1'
 
-build 'app2.cpp' => 'app2.exe'
+build :cxx, 'app2.cpp' => 'app2.exe'
 
 task ['app1', 'app2.exe'] => 'all' do
-  puts "All apps built!"
+  Logger.info "All apps built!"
 end
