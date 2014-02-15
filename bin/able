@@ -4,20 +4,25 @@ require 'able'
 require 'optparse'
 
 project_options = {}
+clean_project = false
 
 parser = OptionParser.new do |opts|
   opts.banner = "Usage: able [options] [targets]"
 
-  opts.on "-C", "--src-dir path", "Change source directory" do |value|
+  opts.on "-S", "--src-dir path", "Change source directory" do |value|
     project_options[:src_root] = value
   end
 
-  opts.on "-B", "--build-dir path", "Change build directory" do |value|
+  opts.on "-D", "--dst-dir path", "Change destination directory" do |value|
     project_options[:dst_root] = value
   end
 
   opts.on "-j", "--jobs count", "Change the number of threads" do |value|
     project_options[:threads] = value.to_i
+  end
+
+  opts.on "-C", "--clean", "Clean project (by removing files)" do
+    clean_project = true
   end
 end
 
@@ -25,11 +30,17 @@ parser.parse!
 
 project = Able::Project.new project_options
 
-if ARGV and not ARGV.empty?
-  ARGV.each do |target|
+handle_target = lambda do |target|
+  if clean_project
+    project.clean(target)
+  else
     project.build_target(target)
   end
+end
+
+if ARGV and not ARGV.empty?
+  ARGV.each(&handle_target)
 else
-  project.build_target
+  handle_target.call(nil)
 end
 

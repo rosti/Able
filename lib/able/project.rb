@@ -80,6 +80,12 @@ module Able
       build_queue(prepare_queue(target))
     end
 
+    def clean(target = nil)
+      clean_targets = @all_tasks.values
+      clean_targets = prepare_queue(target) if target
+      clean_targets.each { |task| task.clean }
+    end
+
   private
 
     def load_default_config()
@@ -107,12 +113,12 @@ module Able
         index += 1
       end
 
-      reversed_queue = Queue.new
-      tasks_queue.reverse.each { |task| reversed_queue.push(task) }
-      reversed_queue
+      tasks_queue.reverse
     end
 
-    def build_queue(tasks_queue)
+    def build_queue(tasks_array)
+      tasks_queue = Queue.new
+      tasks_array.each { |task| tasks_queue.push(task) }
       continue_work = Atomic.new(true)
       thread_handles = []
       @threads.times do

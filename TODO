@@ -1,5 +1,4 @@
 Short term:
-	* Add a clean target
 	* Refurbish default configuration, GCC configuration and make these more OS
 		independent. Probably should add host and target notations too.
 
@@ -11,8 +10,6 @@ Mid term:
 	* Add Java support with different SDKs
 	* Add C# support (MS .Net and Mono)
 	* Add Vala support
-	* Multithreading support
-	* Regular expression support
 
 Long term:
 	* Some configuration ability (ala configure scripting, but much more sane)

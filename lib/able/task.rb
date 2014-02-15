@@ -76,6 +76,11 @@ module Able
       @dependencies.all? { |task| task.executed? }
     end
 
+    def clean
+      Logger.info("Cleaning: #{@output_paths.map(&:to_s)}")
+      @rule.clean(@input_paths, @output_paths, @flags)
+    end
+
   private
     def need_execution?()
       @output_paths.each do |op|

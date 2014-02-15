@@ -13,6 +13,16 @@ module Able
 
     def extra_output_paths(input_paths, output_paths, flags) end
 
+    def clean(input_paths, output_paths, flags)
+      unless flags.include?(:no_clean)
+        file_paths = output_paths.select do |path|
+          File.exists?(path) and not(File.directory?(path))
+        end
+
+        File.delete(*file_paths) unless file_paths.empty?
+      end
+    end
+
   end
 
   class NamelessRule < Rule
