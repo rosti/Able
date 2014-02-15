@@ -1,4 +1,5 @@
 require 'set'
+require 'thread'
 
 module Able
 
@@ -7,14 +8,17 @@ module Able
   #
   module Logger
     @@loggers = Set.new
+    @@mutex = Mutex.new
 
     def self.add_logger(logger)
       @@loggers << logger
     end
 
     def self.call_log_method(meth, *args, &block)
-      loggers = @@loggers.select { |logger| logger.methods.include? meth }
-      loggers.each { |logger| logger.send meth, *args, &block }
+      @@mutex.synchronize do
+        loggers = @@loggers.select { |logger| logger.methods.include? meth }
+        loggers.each { |logger| logger.send meth, *args, &block }
+      end
     end
 
     ##
