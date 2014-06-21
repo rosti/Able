@@ -53,7 +53,8 @@ module Able
     def description()
       desc = @description
       desc = @rule.description(@input_paths, @output_paths, @flags) unless desc
-      desc = "#{@input_paths.map(&:to_s).to_s} => #{@output_paths.map(&:to_s).to_s}" unless desc
+      desc = "Building: #{@input_paths.map(&:to_s).to_s} => #{@output_paths.map(&:to_s).to_s}" unless desc
+      desc
     end
 
     def execute()
@@ -61,7 +62,7 @@ module Able
       raise "Task '#{description}' is not yet executable!" unless executable?
 
       if need_execution?
-        Logger.info("Building: #{description}")
+        Logger.info(description)
         @rule.build(@input_paths, @output_paths, @flags)
       end
 
