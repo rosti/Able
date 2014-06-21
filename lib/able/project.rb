@@ -15,8 +15,8 @@ module Able
       @global_rules = {}
       @default_target = "all"
       @threads = args[:threads] || 1
-      @src_root = Pathname.new(args[:src_root] ? args[:src_root] : '.')
-      @dst_root = Pathname.new(args[:dst_root] ? args[:dst_root] : '.')
+      @src_root = Pathname.new(args[:src_root] || '.')
+      @dst_root = Pathname.new(args[:dst_root] || '.')
 
       Logger.add_logger(ConsoleLogger)
       load_default_config
@@ -46,14 +46,8 @@ module Able
 
       tag_set = Set.new(tags)
 
-      unless rule
-        @rule_sets.each do |rule_set|
-          rule = rule_set.get_rule(name, tag_set)
-          break if rule
-        end
-
-        raise "No rule named '#{name}', containing tags: '#{tag_set.to_a}'" unless rule
-      end
+      rule = @rule_sets.find { |rule_set| rule_set.get_rule(name, tag_set) } unless rule
+      raise "No rule named '#{name}', containing tags: '#{tag_set.to_a}'" unless rule
 
       rule
     end
