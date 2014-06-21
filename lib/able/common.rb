@@ -12,9 +12,12 @@ module Able
       output, status = Open3.capture2e cmdline
 
       if status.exitstatus != 0
-        Logger.info cmdline
-        Logger.info output
+        Logger.error cmdline
+        Logger.error output
         raise "Command failed with status #{status.exitstatus}"
+      else
+        Logger.verb cmdline
+        Logger.verb output
       end
     end
 
