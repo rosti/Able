@@ -11,6 +11,10 @@ module Able
       STDOUT.write args.map(&:to_s).join(' ') + "\n"
     end
 
+    def self.verb *args
+      log "VERB:".blue, *args
+    end
+
     def self.info *args
       log "INFO:".green, *args
     end
