@@ -15,8 +15,16 @@ module Able
       @last_description = text
     end
 
-    def rule(name, type = :local, &block)
-      @directory.add_rule(name, type, &block)
+    def rule(name, &block)
+      @directory.add_rule(self, name, &block)
+    end
+
+    def tag(name)
+      @directory.add_tag(name)
+    end
+
+    def tags(*names)
+      names.each { |t| tag(t) }
     end
 
     def task(*flags, target, &block)
@@ -29,7 +37,7 @@ module Able
       rescue
       end
 
-      @directory.add_task(@last_description, flags, in_files, out_files, &block)
+      @directory.add_task(@last_description, flags, in_files, out_files, self, &block)
     end
 
     def build(rule, *flags, target)
@@ -67,33 +75,6 @@ module Able
 
     def project_targets()
       @directory.project_targets
-    end
-
-  end
-
-  class ConfigBox
-    include Common
-
-    def initialize(rule_set)
-      @rule_set = rule_set
-    end
-
-    def load_contents(path)
-      instance_eval(File.read(path), path)
-    end
-
-    def tag(name)
-      @rule_set.add_tag(name)
-    end
-
-    def tags(*names)
-      names.each { |t| tag(t) }
-    end
-
-    def rule(name, &block)
-      new_rule = Rule.new
-      new_rule.instance_eval(&block)
-      @rule_set.add_rule(name, new_rule)
     end
 
   end

@@ -5,6 +5,12 @@ module Able
   class Rule
     include Common
 
+    def initialize(sandbox)
+      sandbox.instance_variables.each do |var|
+        instance_variable_set(var, sandbox.instance_variable_get(var))
+      end
+    end
+
     def build(input_paths, output_paths, flags) end
 
     def description(input_paths, output_paths, flags) end
@@ -27,7 +33,8 @@ module Able
 
   class NamelessRule < Rule
 
-    def initialize(handler)
+    def initialize(sandbox, handler)
+      super(sandbox)
       @handler = handler
     end
 
@@ -45,15 +52,15 @@ module Able
     end
 
     def add_tag(tag)
-      @tags.add(tag)
+      @tags << tag
     end
 
     def add_rule(name, rule)
       @rules[name] = rule
     end
 
-    def get_rule(name, tags)
-      return @rules[name] if @tags.superset?(tags)
+    def get_rule(name, tags = nil)
+      @rules[name] if not(tags) or @tags.superset?(tags)
     end
 
   end

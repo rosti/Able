@@ -11,15 +11,12 @@ module Able
 
     def initialize(args = {})
       @all_tasks = {}
-      @rule_sets = []
-      @global_rules = {}
       @default_target = "all"
       @threads = args[:threads] || 1
       @src_root = Pathname.new(args[:src_root] || '.')
       @dst_root = Pathname.new(args[:dst_root] || '.')
 
       Logger.add_logger(ConsoleLogger)
-      load_default_config
 
       @root_dir = Directory.new('.', nil, self, @src_root, @dst_root)
       @root_dir.load_buildable
@@ -35,31 +32,13 @@ module Able
       end
     end
 
-    def add_rule(name, rule)
-      raise "Global rules cannot contain '_' in their names" if name.to_s.include?("_")
-      global_rules[name] = rule
-    end
+    def get_path(subdir, name)
+      path = subdir + name
+      path = @src_root + name unless path.file?
+      path = @dst_root + name unless path.file?
 
-    def find_rule(name, tags)
-      rule = @global_rules[name]
-      raise "No global rule '#{name}'" if tags.include?(:global)
-
-      tag_set = Set.new(tags)
-
-      rule = @rule_sets.find { |rule_set| rule_set.get_rule(name, tag_set) } unless rule
-      raise "No rule named '#{name}', containing tags: '#{tag_set.to_a}'" unless rule
-
-      rule
-    end
-
-    def load_config(name)
-      tags = Pathname.new(name.to_s).basename(".able").to_s.split('_')
-      rule_set = RuleSet.new(tags)
-
-      sandbox = ConfigBox(rule_set)
-      sandbox.load_contents(name.to_s)
-
-      @rule_sets.insert(0, rule_set)
+      raise "Cannot find file #{name}" unless path.file?
+      path
     end
 
     def load_logger(name)
@@ -81,16 +60,6 @@ module Able
     end
 
   private
-
-    def load_default_config()
-      rule_set = RuleSet.new([:default])
-
-      sandbox = ConfigBox.new(rule_set)
-      defconfig = File.dirname(__FILE__) + "/defconfig.rb"
-      sandbox.instance_eval(File.read(defconfig), defconfig)
-
-      @rule_sets.insert(0, rule_set)
-    end
 
     def prepare_queue(target)
       tasks_queue = [@all_tasks[target]]
