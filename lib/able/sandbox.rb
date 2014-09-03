@@ -1,5 +1,18 @@
 module Able
 
+  class ConfigBox
+    include Common
+
+    def initialize(directory, prefix)
+      @directory = directory
+      @prefix = prefix
+    end
+
+    def rule(name, rule_obj)
+      @directory.add_rule(name, rule_obj, @prefix)
+    end
+  end
+
   class BuildBox
     include Common
 
@@ -8,23 +21,15 @@ module Able
       @last_description = nil
     end
 
+    def rule(name, &block)
+      @directory.add_rule(name, BasicRule.new(block))
+    end
+
     def desc(text)
       if @last_description
         Logger.warn("Overriding previous description '#{@last_description}' with a new one '#{text}'")
       end
       @last_description = text
-    end
-
-    def rule(name, &block)
-      @directory.add_rule(self, name, &block)
-    end
-
-    def tag(name)
-      @directory.add_tag(name)
-    end
-
-    def tags(*names)
-      names.each { |t| tag(t) }
     end
 
     def task(*flags, target, &block)
@@ -61,8 +66,8 @@ module Able
       names.each { |name| subdir(name) }
     end
 
-    def config(name)
-      @directory.load_config(name)
+    def config(name, prefix = nil)
+      @directory.load_config(name, prefix)
     end
 
     def logger(name)

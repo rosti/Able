@@ -1,15 +1,9 @@
-require 'set'
+require 'fileutils'
 
 module Able
 
   class Rule
     include Common
-
-    def initialize(sandbox)
-      sandbox.instance_variables.each do |var|
-        instance_variable_set(var, sandbox.instance_variable_get(var))
-      end
-    end
 
     def build(input_paths, output_paths, flags) end
 
@@ -31,10 +25,9 @@ module Able
 
   end
 
-  class NamelessRule < Rule
+  class BasicRule < Rule
 
-    def initialize(sandbox, handler)
-      super(sandbox)
+    def initialize(handler)
       @handler = handler
     end
 
@@ -44,24 +37,17 @@ module Able
 
   end
 
-  class RuleSet
+  module Base
 
-    def initialize(tags)
-      @rules = {}
-      @tags = Set.new(tags)
+    class Mkpath < Rule
+      def build(in_paths, out_paths, flags)
+        out_paths.each { |path| FileUtils.mkpath(path) }
+      end
     end
 
-    def add_tag(tag)
-      @tags << tag
-    end
-
-    def add_rule(name, rule)
-      @rules[name] = rule
-    end
-
-    def get_rule(name, tags = nil)
-      @rules[name] if not(tags) or @tags.superset?(tags)
-    end
+    Rules = {
+      mkdir: Mkpath.new,
+    }
 
   end
 

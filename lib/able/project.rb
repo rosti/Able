@@ -32,10 +32,14 @@ module Able
       end
     end
 
-    def get_path(subdir, name)
+    def get_path(subdir, name, type=nil)
       path = subdir + name
       path = @src_root + name unless path.file?
       path = @dst_root + name unless path.file?
+      unless path.file?
+        path = Pathname.new(__dir__) + type.to_s
+        path += name
+      end
 
       raise "Cannot find file #{name}" unless path.file?
       path
