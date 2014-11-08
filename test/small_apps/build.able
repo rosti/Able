@@ -1,5 +1,7 @@
 default 'all'
 
+config :gcc
+
 build :cc, 'app1.c' => 'app1'
 
 build :cxx, 'app2.cpp' => 'app2.exe'
