@@ -3,15 +3,14 @@ require 'thread'
 require 'pathname'
 
 module Able
-
+  # Project controller
   class Project
-
     attr_accessor :default_target
     attr_reader :all_tasks, :src_root, :dst_root
 
     def initialize(args = {})
       @all_tasks = {}
-      @default_target = "all"
+      @default_target = 'all'
       @threads = args[:threads] || 1
       @src_root = Pathname.new(args[:src_root] || '.')
       @dst_root = Pathname.new(args[:dst_root] || '.')
@@ -25,14 +24,14 @@ module Able
     def add_task(task)
       task.output_paths.map(&:to_s).each do |target|
         if @all_tasks[target]
-          raise "Task '#{task}' is duplicting task '#{@all_tasks[target]}' for target '#{target}'"
+          fail "Task '#{task}' is duplicting task '#{@all_tasks[target]}' for target '#{target}'"
         end
 
         @all_tasks[target] = task
       end
     end
 
-    def get_path(subdir, name, type=nil)
+    def get_path(subdir, name, type = nil)
       path = subdir + name
       path = @src_root + name unless path.file?
       path = @dst_root + name unless path.file?
@@ -41,7 +40,7 @@ module Able
         path += name
       end
 
-      raise "Cannot find file #{name}" unless path.file?
+      fail "Cannot find file #{name}" unless path.file?
       path
     end
 
@@ -52,7 +51,7 @@ module Able
     def build_target(target = nil)
       target = @default_target unless target
 
-      raise "No task '#{target}', nothing to do!" unless @all_tasks[target]
+      fail "No task '#{target}', nothing to do!" unless @all_tasks[target]
 
       build_queue(prepare_queue(target))
     end
@@ -60,10 +59,10 @@ module Able
     def clean(target = nil)
       clean_targets = @all_tasks.values
       clean_targets = prepare_queue(target) if target
-      clean_targets.each { |task| task.clean }
+      clean_targets.each(&:clean)
     end
 
-  private
+    private
 
     def prepare_queue(target)
       tasks_queue = [@all_tasks[target]]
@@ -73,9 +72,9 @@ module Able
       while index < tasks_queue.count
         task = tasks_queue[index]
         in_paths = task.input_paths.map(&:to_s)
-        depends = @all_tasks.select { |path, task| in_paths.include?(path) }
+        depends = @all_tasks.select { |path, _| in_paths.include?(path) }
         task.dependencies = depends
-        tasks_queue |= task.dependencies.select { |task| not(task.visited?) }
+        tasks_queue |= task.dependencies.select { |tsk| !tsk.visited? }
         task.dependencies.each(&:visit)
         index += 1
       end
@@ -115,6 +114,5 @@ module Able
 
       thread_handles.each(&:join)
     end
-
   end
 end

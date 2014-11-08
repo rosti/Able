@@ -1,5 +1,5 @@
 module Able
-
+  # Sandbox environment for configurations
   class ConfigBox
     include Common
 
@@ -13,6 +13,7 @@ module Able
     end
   end
 
+  # Sandbox environment for build files
   class BuildBox
     include Common
 
@@ -57,13 +58,11 @@ module Able
     end
 
     def default(target)
-      @directory.set_default_target(target)
+      @directory.default_target(target)
     end
 
-    def project_targets()
+    def project_targets
       @directory.project_targets
     end
-
   end
-
 end

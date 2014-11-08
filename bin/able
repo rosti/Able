@@ -7,21 +7,21 @@ project_options = {}
 clean_project = false
 
 parser = OptionParser.new do |opts|
-  opts.banner = "Usage: able [options] [targets]"
+  opts.banner = 'Usage: able [options] [targets]'
 
-  opts.on "-S", "--src-dir path", "Change source directory" do |value|
+  opts.on '-S', '--src-dir path', 'Change source directory' do |value|
     project_options[:src_root] = value
   end
 
-  opts.on "-D", "--dst-dir path", "Change destination directory" do |value|
+  opts.on '-D', '--dst-dir path', 'Change destination directory' do |value|
     project_options[:dst_root] = value
   end
 
-  opts.on "-j", "--jobs count", "Change the number of threads" do |value|
+  opts.on '-j', '--jobs count', 'Change the number of threads' do |value|
     project_options[:threads] = value.to_i
   end
 
-  opts.on "-C", "--clean", "Clean project (by removing files)" do
+  opts.on '-C', '--clean', 'Clean project (by removing files)' do
     clean_project = true
   end
 end
@@ -38,9 +38,8 @@ handle_target = lambda do |target|
   end
 end
 
-if ARGV and not ARGV.empty?
+if ARGV && !ARGV.empty?
   ARGV.each(&handle_target)
 else
   handle_target.call(nil)
 end
-

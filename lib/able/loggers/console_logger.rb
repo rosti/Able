@@ -1,32 +1,28 @@
 require 'colorize'
 
 module Able
-
   ##
   # Simple console logger for Able
   #
   module ConsoleLogger
-
-    def self.log *args
+    def self.log(*args)
       STDOUT.write args.map(&:to_s).join(' ') + "\n"
     end
 
-    def self.verb *args
-      log "VERB:".blue, *args
+    def self.verb(*args)
+      log 'VERB:'.blue, *args
     end
 
-    def self.info *args
-      log "INFO:".green, *args
+    def self.info(*args)
+      log 'INFO:'.green, *args
     end
 
-    def self.warn *args
-      log "WARNING:".yellow, *args
+    def self.warn(*args)
+      log 'WARNING:'.yellow, *args
     end
 
-    def self.error *args
-      log "ERROR:".red, *args
+    def self.error(*args)
+      log 'ERROR:'.red, *args
     end
-
   end
-
 end

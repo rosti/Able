@@ -1,13 +1,14 @@
 require 'thread'
 
 module Able
+  # provide an atomic access variable container
   class Atomic
     def initialize(data = nil)
       @data = data
       @mutex = Mutex.new
     end
 
-    def get()
+    def get
       @mutex.synchronize { @data }
     end
 

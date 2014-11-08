@@ -1,9 +1,8 @@
 require 'set'
 
 module Able
-
+  # Task entity and execution
   class Task
-
     attr_reader :dependencies
 
     def initialize(project, rule, flags, in_files, out_files, in_dir, out_dir, depends, description)
@@ -42,24 +41,24 @@ module Able
       canonize_paths(@output_paths, @project.dst_root)
     end
 
-    def visited?()
+    def visited?
       @visited
     end
 
-    def visit()
+    def visit
       @visited = true
     end
 
-    def description()
+    def description
       desc = @description
       desc = @rule.description(@input_paths, @output_paths, @flags) unless desc
-      desc = "Building: #{@input_paths.map(&:to_s).to_s} => #{@output_paths.map(&:to_s).to_s}" unless desc
+      desc = "Building: #{@input_paths.map(&:to_s)} => #{@output_paths.map(&:to_s)}" unless desc
       desc
     end
 
-    def execute()
-      raise "Attempt to execute task '#{description}' again" if executed?
-      raise "Task '#{description}' is not yet executable!" unless executable?
+    def execute
+      fail "Attempt to execute task '#{description}' again" if executed?
+      fail "Task '#{description}' is not yet executable!" unless executable?
 
       if need_execution?
         Logger.info(description)
@@ -69,12 +68,12 @@ module Able
       @executed = true
     end
 
-    def executed?()
+    def executed?
       @executed
     end
 
-    def executable?()
-      @dependencies.all? { |task| task.executed? }
+    def executable?
+      @dependencies.all?(&:executed?)
     end
 
     def clean
@@ -82,8 +81,9 @@ module Able
       @rule.clean(@input_paths, @output_paths, @flags)
     end
 
-  private
-    def need_execution?()
+    private
+
+    def need_execution?
       @output_paths.each do |op|
         @input_paths.each do |ip|
           return true if File.mtime(op.to_s) < File.mtime(ip.to_s)
@@ -104,8 +104,5 @@ module Able
         end
       end
     end
-
   end
-
 end
-

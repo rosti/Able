@@ -1,7 +1,6 @@
 module Able
-
+  # Deal with project directory, its tasks and etc.
   class Directory
-
     def initialize(name, parent, project, in_dir, out_dir)
       @name = name
       @parent = parent
@@ -16,8 +15,8 @@ module Able
     end
 
     def root_dir?
-      @parent == nil
-    end 
+      @parent.nil?
+    end
 
     def add_task(description, build_args, &block)
       flags, in_files, out_files = fix_build_args(build_args)
@@ -36,7 +35,7 @@ module Able
       @project.add_task(task)
     end
 
-    def load_buildable(build_able = "build.able", &block)
+    def load_buildable(build_able = 'build.able', &block)
       build_able_path = @in_dir + build_able
       build_able_contents = nil
 
@@ -49,7 +48,7 @@ module Able
       @sandbox.instance_eval(&block) if block
     end
 
-    def add_subdir(name, &block)
+    def add_subdir(name)
       return if @subdirs[name]
 
       subdir = Directory.new(name.to_s, self, @project, @in_dir, @out_dir)
@@ -73,27 +72,27 @@ module Able
       @project.load_logger(logger)
     end
 
-    def project_targets()
+    def project_targets
       @project.all_tasks.keys
     end
 
-    def set_default_target(target)
+    def default_target(target)
       @project.default_target = target if root_dir?
     end
 
     def find_rule(rule_name)
       rule = @rules[rule_name.to_sym]
       rule = @parent.find_rule(rule_name) if not rule and @parent
-      rule = Base::Rules[rule_name.to_sym] unless rule
-      raise "No config rule '#{rule_name}' found!" unless rule
+      rule = Base::RULES[rule_name.to_sym] unless rule
+      fail "No config rule '#{rule_name}' found!" unless rule
       rule
     end
 
-  private
+    private
 
     def fix_build_args(args)
       last_arg = args.last
-      in_files, out_files, flags = nil, nil, nil
+      in_files, out_files = nil, nil
       extra_opts = {}
 
       if last_arg.is_a? Hash
@@ -112,7 +111,5 @@ module Able
       flags = args[0...-1].select { |opt| not opt.is_a?(Hash) }.map { |opt| [opt, true] }.to_h
       return flags.merge(hashes).merge(extra_opts), Array(in_files), out_files
     end
-
   end
-
 end

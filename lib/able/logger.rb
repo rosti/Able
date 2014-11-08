@@ -2,7 +2,6 @@ require 'set'
 require 'thread'
 
 module Able
-
   ##
   # A module that handles logging
   #
@@ -24,22 +23,20 @@ module Able
     ##
     # Log arguments
     #
-    def self.verb *args
+    def self.verb(*args)
       call_log_method :verb, *args if $verbose or ENV['V'].to_i == 1
     end
 
-    def self.info *args
+    def self.info(*args)
       call_log_method :info, *args
     end
 
-    def self.warn *args
+    def self.warn(*args)
       call_log_method :warn, *args
     end
 
-    def self.error *args
+    def self.error(*args)
       call_log_method :error, *args
     end
-
   end
-
 end
