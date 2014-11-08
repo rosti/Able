@@ -9,6 +9,8 @@ module Able
 
     def description(input_paths, output_paths, flags) end
 
+    def make_output_files(input_paths) end
+
     def extra_input_paths(input_paths, output_paths, flags) end
 
     def extra_output_paths(input_paths, output_paths, flags) end

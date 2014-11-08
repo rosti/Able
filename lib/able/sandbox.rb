@@ -32,30 +32,12 @@ module Able
       @last_description = text
     end
 
-    def task(*flags, target, &block)
-      in_files = nil
-      out_files = target
-
-      begin
-        in_files = target.keys.first
-        out_files = target.values.first
-      rescue
-      end
-
-      @directory.add_task(@last_description, flags, in_files, out_files, self, &block)
+    def task(*args, &block)
+      @directory.add_task(@last_description, args, &block)
     end
 
-    def build(rule, *flags, target)
-      in_files = nil
-      out_files = target
-
-      begin
-        in_files = target.keys.first
-        out_files = target.values.first
-      rescue
-      end
-
-      @directory.add_build(@last_description, rule, flags, in_files, out_files)
+    def build(rule, *args)
+      @directory.add_build(@last_description, rule, args)
     end
 
     def subdir(name, &block)

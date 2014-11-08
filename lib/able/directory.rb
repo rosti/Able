@@ -17,18 +17,21 @@ module Able
 
     def root_dir?
       @parent == nil
-    end
+    end 
 
-    def add_task(description, flags, in_files, out_files, sandbox, &block)
+    def add_task(description, build_args, &block)
+      flags, in_files, out_files = fix_build_args(build_args)
       task = Task.new(@project, BasicRule.new(block),
-                      Array(flags), Array(in_files), Array(out_files),
+                      flags, in_files, Array(out_files),
                       @in_dir, @out_dir, [@task], description)
       @project.add_task(task)
     end
 
-    def add_build(description, rule, flags, in_files, out_files)
-      task = Task.new(@project, find_rule(rule),
-                      Array(flags), Array(in_files), Array(out_files),
+    def add_build(description, rule, build_args)
+      build_rule = find_rule(rule)
+      flags, in_files, out_files = fix_build_args(build_args)
+      task = Task.new(@project, build_rule, flags, in_files,
+                      Array(out_files || build_rule.make_output_files(in_files)),
                       @in_dir, @out_dir, [@task], description)
       @project.add_task(task)
     end
@@ -84,6 +87,30 @@ module Able
       rule = Base::Rules[rule_name.to_sym] unless rule
       raise "No config rule '#{rule_name}' found!" unless rule
       rule
+    end
+
+  private
+
+    def fix_build_args(args)
+      last_arg = args.last
+      in_files, out_files, flags = nil, nil, nil
+      extra_opts = {}
+
+      if last_arg.is_a? Hash
+        in_files = last_arg.delete(:input)
+        out_files = last_arg.delete(:output)
+        unless in_files or out_files
+          in_files = last_arg.keys.last
+          out_files = last_arg.delete(in_files)
+        end
+        extra_opts = last_arg
+      else
+        in_files = last_arg
+      end
+
+      hashes = args[0...-1].select { |opt| opt.is_a?(Hash) }.inject({}) { |a, b| a.merge(b) }
+      flags = args[0...-1].select { |opt| not opt.is_a?(Hash) }.map { |opt| [opt, true] }.to_h
+      return flags.merge(hashes).merge(extra_opts), Array(in_files), out_files
     end
 
   end
