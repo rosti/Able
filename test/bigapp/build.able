@@ -1,8 +1,10 @@
 default 'bigapp'
 
+config :gcc
+
 subdirs 'subd', 'cpp_part'
 
-build :ccobj, 'main.c' => 'main.o'
+build :ccobj, 'main.c'
 
 all_objs = project_targets.select { |tgt| tgt.end_with?('.o') }
 build :cxx, all_objs => 'bigapp'
