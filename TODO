@@ -1,7 +1,3 @@
-Short term:
-	* Refurbish default configuration, GCC configuration and make these more OS
-		independent. Probably should add host and target notations too.
-
 Mid term:
 	* Better documentation
 	* Better tests (probably integrated too)
@@ -9,7 +5,6 @@ Mid term:
 	* Add Visual C++ and Windows SDK support
 	* Add Java support with different SDKs
 	* Add C# support (MS .Net and Mono)
-	* Add Vala support
 
 Long term:
 	* Some configuration ability (ala configure scripting, but much more sane)
