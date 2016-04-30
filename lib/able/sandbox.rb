@@ -1,15 +1,15 @@
 module Able
   # Sandbox environment for configurations
-  class ConfigBox
+  class ToolBox
     include Common
 
-    def initialize(directory, prefix)
+    def initialize(directory, path)
       @directory = directory
-      @prefix = prefix
+      instance_eval(File.read(path), path.to_s)
     end
 
-    def rule(name, rule_obj)
-      @directory.add_rule(@prefix ? "#{@prefix}_#{name}" : name, rule_obj)
+    def rule(name, rule_class)
+      @directory.add_rule(name, rule_class)
     end
   end
 
@@ -23,7 +23,7 @@ module Able
     end
 
     def rule(name, &block)
-      @directory.add_rule(name, BasicRule.new(block))
+      @directory.add_basic_rule(name, block)
     end
 
     def desc(text)
@@ -49,8 +49,12 @@ module Able
       names.each { |name| subdir(name) }
     end
 
-    def config(name, prefix = nil)
-      @directory.load_config(name, prefix)
+    def config(filename)
+      @directory.load_config(filename)
+    end
+
+    def toolset(name)
+      @directory.load_toolset(name)
     end
 
     def logger(name)

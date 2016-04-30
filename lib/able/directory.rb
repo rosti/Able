@@ -1,6 +1,8 @@
 module Able
   # Deal with project directory, its tasks and etc.
   class Directory
+    attr_accessor :config
+
     def initialize(name, parent, project, in_dir, out_dir)
       @name = name
       @parent = parent
@@ -9,8 +11,9 @@ module Able
       @out_dir = out_dir + name
       @subdirs = {}
       @rules = {}
+      @config = Configuration.new(parent ? parent.config : nil)
       @sandbox = BuildBox.new(self)
-      @task = Task.new(project, find_rule(:mkdir), [], [], [name], in_dir, out_dir, nil, nil)
+      @task = Task.new(project, Base::Mkpath.new(@config), [], [], [name], in_dir, out_dir, nil, nil)
       @project.add_task(@task)
     end
 
@@ -18,16 +21,29 @@ module Able
       @parent.nil?
     end
 
+    def add_rule(name, rule_class)
+      @rules[name.to_sym] = rule_class
+    end
+
+    def build_basic_rule(block)
+      Class.new(Rule) { define_method(:build, block) }
+    end
+
+    def add_basic_rule(name, block)
+      add_rule(name, build_basic_rule(block))
+    end
+
     def add_task(description, build_args, &block)
       flags, in_files, out_files = fix_build_args(build_args)
-      task = Task.new(@project, BasicRule.new(block),
+      rule = build_basic_rule(block).new(config)
+      task = Task.new(@project, rule,
                       flags, in_files, Array(out_files),
                       @in_dir, @out_dir, [@task], description)
       @project.add_task(task)
     end
 
     def add_build(description, rule, build_args)
-      build_rule = find_rule(rule)
+      build_rule = find_rule(rule).new(config)
       flags, in_files, out_files = fix_build_args(build_args)
       task = Task.new(@project, build_rule, flags, in_files,
                       Array(out_files || build_rule.make_output_files(in_files)),
@@ -57,14 +73,12 @@ module Able
       @subdirs[name] = subdir
     end
 
-    def load_config(name, prefix)
-      path = @project.get_path(@in_dir, "#{name}.config", :configs).to_s
-      configbox = ConfigBox.new(self, prefix)
-      configbox.instance_eval(File.read(path), path)
+    def load_config(filename)
+      config.merge_from_file!(filename)
     end
 
-    def add_rule(name, rule_obj)
-      @rules[name.to_sym] = rule_obj
+    def load_toolset(name)
+      ToolBox.new(self, @project.get_path(@in_dir, "#{name}.toolset", :toolsets))
     end
 
     def load_logger(logger)
@@ -79,10 +93,14 @@ module Able
       @project.default_target = target if root_dir?
     end
 
+    def find_local_or_base_rule(rule_sym)
+      rule = @rules[rule_sym]
+      rule = @parent.find_local_or_base_rule(rule_sym) if not rule and @parent
+      rule
+    end
+
     def find_rule(rule_name)
-      rule = @rules[rule_name.to_sym]
-      rule = @parent.find_rule(rule_name) if not rule and @parent
-      rule = Base::RULES[rule_name.to_sym] unless rule
+      rule = find_local_or_base_rule(rule_name.to_sym)
       fail "No config rule '#{rule_name}' found!" unless rule
       rule
     end

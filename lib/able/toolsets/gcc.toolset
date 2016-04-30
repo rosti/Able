@@ -17,10 +17,9 @@ module GCC
  
   class CompilerBase < Able::Rule
 
-    def initialize(executable, prefix_options, suffix_options)
+    def initialize(executable, config)
       @executable = executable
-      @prefix_options = Array(prefix_options)
-      @suffix_options = Array(suffix_options)
+      @config = config
     end
 
     def flags2libs(flags)
@@ -43,7 +42,7 @@ module GCC
     end
 
     def do_build(input_paths, target, prefix_opts, suffix_opts)
-      sh @executable, *@prefix_options, *prefix_opts, '-o', target, *input_paths, *@suffix_options, *suffix_opts
+      sh @executable, *@config[:prefix_opts], *prefix_opts, '-o', target, *input_paths, *suffix_opts
     end
 
     def build(input_paths, output_paths, flags)
@@ -66,14 +65,14 @@ module GCC
       end
     end
 
-    def initialize(executable, prefix_options, suffix_options)
-      super(executable, Array(prefix_options) | ["-c"], suffix_options)
+    def initialize(executable, config)
+      super(executable, config.merge({prefix_opts: ['-c']})) # FIXME: Big stub here
     end
 
     def build(input_paths, output_paths, flags)
       target = Array(output_paths).first
       inputs = filter_headers(input_paths)
-      do_build Array(input_paths), target, flags2opts(flags) | ["-MMD -MP -MF #{dep_file(target)}"], flags2libs(flags)
+      do_build inputs, target, flags2opts(flags) | ["-MMD -MP -MF #{dep_file(target)}"], flags2libs(flags)
     end
 
     def extra_input_paths(input_paths, output_paths, flags)
@@ -88,33 +87,32 @@ module GCC
   end
 
   class CxxCompileObj < CompileObj
-    def initialize(prefix, prefix_options, suffix_options)
-      super("#{prefix}g++", prefix_options, suffix_options)
+    def initialize(config)
+      super("#{config[:prefix]}g++", config)
     end
   end
 
   class CCompileObj < CompileObj
-    def initialize(prefix, prefix_options, suffix_options)
-      super("#{prefix}gcc", prefix_options, suffix_options)
+    def initialize(config)
+      super("#{config[:prefix]}gcc", config)
     end
   end
 
   class CxxCompile < CompilerBase
-    def initialize(prefix, prefix_options, suffix_options)
-      super("#{prefix}g++", prefix_options, suffix_options)
+    def initialize(config)
+      super("#{config[:prefix]}g++", config)
     end
   end
 
   class CCompile < CompilerBase
-    def initialize(prefix, prefix_options, suffix_options)
-      super("#{prefix}gcc", prefix_options, suffix_options)
+    def initialize(config)
+      super("#{config[:prefix]}gcc", config)
     end
   end
 
 end
 
-rule :ccobj, GCC::CCompileObj.new(ENV["CROSS_PREFIX"], nil, nil)
-rule :cxxobj, GCC::CxxCompileObj.new(ENV["CROSS_PREFIX"], nil, nil)
-rule :cc, GCC::CCompile.new(ENV["CROSS_PREFIX"], nil, nil)
-rule :cxx, GCC::CxxCompile.new(ENV["CROSS_PREFIX"], nil, nil)
-
+rule :ccobj, GCC::CCompileObj
+rule :cxxobj, GCC::CxxCompileObj
+rule :cc, GCC::CCompile
+rule :cxx, GCC::CxxCompile

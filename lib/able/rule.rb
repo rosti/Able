@@ -5,6 +5,12 @@ module Able
   class Rule
     include Common
 
+    attr_accessor :config
+
+    def initialize(config)
+      @config = config
+    end
+
     def build(_input_paths, _output_paths, _flags) end
 
     def description(_input_paths, _output_paths, _flags) end
@@ -26,17 +32,6 @@ module Able
     end
   end
 
-  # A rule that can only build things
-  class BasicRule < Rule
-    def initialize(handler)
-      @handler = handler
-    end
-
-    def build(input_paths, output_paths, flags)
-      @handler.call(input_paths, output_paths, flags)
-    end
-  end
-
   # Some platform-independent base rules can go here
   module Base
     # simple make path rule
@@ -45,9 +40,5 @@ module Able
         out_paths.each { |path| FileUtils.mkpath(path) }
       end
     end
-
-    RULES = {
-      mkdir: Mkpath.new,
-    }
   end
 end

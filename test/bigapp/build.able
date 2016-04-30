@@ -1,6 +1,6 @@
 default 'bigapp'
 
-config :gcc
+toolset :gcc
 
 subdirs 'subd', 'cpp_part'
 
