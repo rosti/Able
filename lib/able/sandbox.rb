@@ -9,7 +9,7 @@ module Able
     end
 
     def rule(name, rule_obj)
-      @directory.add_rule(name, rule_obj, @prefix)
+      @directory.add_rule(@prefix ? "#{@prefix}_#{name}" : name, rule_obj)
     end
   end
 

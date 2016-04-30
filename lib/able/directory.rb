@@ -63,9 +63,8 @@ module Able
       configbox.instance_eval(File.read(path), path)
     end
 
-    def add_rule(name, rule_obj, prefix = nil)
-      rule_name = prefix ? "#{prefix}_#{name}".to_sym : name.to_sym
-      @rules[rule_name] = rule_obj
+    def add_rule(name, rule_obj)
+      @rules[name.to_sym] = rule_obj
     end
 
     def load_logger(logger)
