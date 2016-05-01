@@ -68,5 +68,53 @@ module Able
     def project_targets
       @directory.project_targets
     end
+
+    def config_value(key)
+      @directory.config[key]
+    end
+
+    def config_setting(key, value)
+      @directory.config[key] = value
+    end
+
+    def config_options(key, *opts)
+      @directory.config.add_option!(key, opts)
+    end
+
+    def config_pairs(key, pairs)
+      @directory.config.add_pairs!(key, pairs)
+    end
+
+    def include_dir(*dir)
+      config_options(:inc_dirs, dir)
+    end
+
+    def include_file(*file)
+      config_options(:inc_files, file)
+    end
+
+    def lib_dir(*dir)
+      config_options(:lib_dirs, dir)
+    end
+
+    def link_lib(*library)
+      config_options(:link_libs, library)
+    end
+
+    def cflags(*flags)
+      config_options(:cflags, flags)
+    end
+
+    def cxxflags(*flags)
+      config_options(:cxxflags, flags)
+    end
+
+    def ldlags(*flags)
+      config_options(:ldflags, flags)
+    end
+
+    def defines(pairs)
+      config_pairs(:defines, pairs)
+    end
   end
 end
