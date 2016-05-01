@@ -3,76 +3,88 @@ require 'pathname'
 module GCC
 
   HEADER_EXTS = [".h", ".hh", ".hp", ".hxx", ".hpp", ".h++", ".tcc"]
- 
-  FLAGS_MAP = {
-    :defines          => -> (arg) { Array(arg).map { |d| "-D#{d}" }.join(' ') },
-    :standard         => -> (arg) { "-std=#{arg}" },
-    :includes         => -> (arg) { Array(arg).map { |i| "-include #{i}" }.join(' ') },
-    :incdirs          => -> (arg) { Array(arg).map { |id| "-I#{id}" }.join(' ') },
-    :libdirs          => -> (arg) { Array(arg).map { |ld| "-L#{ld}" }.join(' ') },
-    :raw              => -> (arg) { String(arg) },
-    :libs             => -> (arg) {},
-    :O2               => -> (arg) { "-O2" if arg }
-  }
- 
-  class CompilerBase < Able::Rule
 
-    def initialize(executable, config)
-      @executable = executable
+  module LinkLibraries
+
+    def link_libs(settings)
+      all_libs = Array(settings[:link_libs]) | Array(@config[:link_libs])
+      all_libs.map { |lib| '-l'+lib.to_s }
+    end
+  end
+
+  module CxxExecutable
+
+    def executable(settings)
+      build_executable(:cxx, settings, 'g++')
+    end
+  end
+
+  module CExecutable
+
+    def executable(settings)
+      build_executable(:cc, settings, 'gcc')
+    end
+  end
+
+  module CxxFlags
+    def flags(settings, target)
+      build_flags(:cxxflags, settings, target)
+    end
+  end
+
+  module CFlags
+    def flags(settings, target)
+      build_flags(:cflags, settings, target)
+    end
+  end
+
+  class Base < Able::Rule
+
+    def initialize(config)
       @config = config
     end
 
-    def flags2libs(flags)
-      Array(flags[:libs]).map { |l| "-l#{l}" }
+    def build(input_paths, output_paths, settings)
+      target = Array(output_paths).first
+      sh executable(settings), *flags(settings, target), '-o', target,
+         *filter_inputs(Array(input_paths)), *link_libs(settings)
     end
 
-    def flags2opts(flags)
-      flags.map do |flag, value|
-        handler = FLAGS_MAP[flag]
-        if handler
-          handler.call(value)
-        else
-          flag.length > 1 ? "--#{flag}=#{value}" : "-#{flag} #{value}"
-        end
-      end
+    def link_libs(_settings)
+      []
     end
 
-    def make_output_files(input_files)
-      input_files.map { |f| f + ".o" }
+    def build_option(symbol, prefix, settings)
+      options = Array(settings[symbol]) | Array(@config[symbol])
+      options.map { |opt| prefix+opt.to_s }
     end
 
-    def do_build(input_paths, target, prefix_opts, suffix_opts)
-      sh @executable, *@config[:prefix_opts], *prefix_opts, '-o', target, *input_paths, *suffix_opts
+    def build_pairs(symbol, prefix, settings)
+      pairs = settings[symbol].to_h.merge(@config[symbol].to_h)
+      pairs.map { |key,value| prefix+key.to_s+(value ? '='+value.to_s : '') }
     end
 
-    def build(input_paths, output_paths, flags)
-      do_build Array(input_paths), Array(output_paths).first, flags2opts(flags), flags2libs(flags)
+    def build_flags(symbol, settings, extra_flags = [])
+      [ENV[symbol.to_s.upcase]] | Array(settings[symbol]) | Array(@config[symbol]) |
+          build_option(:lib_dirs, '-L', settings) | extra_flags
     end
 
+    def build_executable(symbol, settings, default)
+      ENV[symbol.to_s.upcase] || settings[symbol] || @config[symbol] || default
+    end
+
+    def filter_inputs(input_paths)
+      input_paths
+    end
   end
 
-  class CompileObj < CompilerBase
+  class CompilerBase < Base
 
-    def dep_file(target)
-      target.to_s + ".d"
-    end
-
-    def filter_headers(input_paths)
-      inputs = Array(input_paths)
-      inputs.select do |path|
+    def filter_inputs(input_paths)
+      input_paths.select do |path|
         str_path = path.to_s.downcase
         not(HEADER_EXTS.any? { |ext| str_path.end_with?(ext) })
       end
-    end
-
-    def initialize(executable, config)
-      super(executable, config.merge({prefix_opts: ['-c']})) # FIXME: Big stub here
-    end
-
-    def build(input_paths, output_paths, flags)
-      target = Array(output_paths).first
-      inputs = filter_headers(input_paths)
-      do_build inputs, target, flags2opts(flags) | ["-MMD -MP -MF #{dep_file(target)}"], flags2libs(flags)
     end
 
     def extra_input_paths(input_paths, output_paths, flags)
@@ -84,35 +96,90 @@ module GCC
       Pathname.new(dep_file(output_paths.first))
     end
 
+    def dep_file(target)
+      target.to_s + ".d"
+    end
+
+    def build_flags(symbol, settings, target)
+      super(symbol, settings, ['-MMD -MP -MF '+dep_file(target),
+                               *build_option(:inc_dirs, '-I', settings),
+                               *build_option(:inc_files, '-include ', settings),
+                               *build_pairs(:defines, '-D', settings)])
+    end
+  end
+
+  class CompileObj < CompilerBase
+
+    def make_output_files(input_files)
+      input_files.map { |f| f + ".o" }
+    end
+
+    def build_flags(symbol, settings, target)
+      super(symbol, settings, target) | ['-c']
+    end
   end
 
   class CxxCompileObj < CompileObj
-    def initialize(config)
-      super("#{config[:prefix]}g++", config)
-    end
+    include CxxExecutable
+    include CxxFlags
   end
 
   class CCompileObj < CompileObj
-    def initialize(config)
-      super("#{config[:prefix]}gcc", config)
-    end
+    include CExecutable
+    include CFlags
   end
 
   class CxxCompile < CompilerBase
-    def initialize(config)
-      super("#{config[:prefix]}g++", config)
-    end
+    include LinkLibraries
+    include CxxExecutable
+    include CxxFlags
   end
 
   class CCompile < CompilerBase
-    def initialize(config)
-      super("#{config[:prefix]}gcc", config)
+    include LinkLibraries
+    include CExecutable
+    include CFlags
+  end
+
+  class CLinkBase < Base
+    include LinkLibraries
+
+    def flags(settings, _target)
+      build_flags(:ldflags, settings)
     end
   end
 
+  class CLink < CLinkBase
+    include CExecutable
+  end
+
+  class CxxLink < CLinkBase
+    include CxxExecutable
+  end
+
+  class LdLink < CLinkBase
+
+    def executable(settings)
+      build_executable(:ld, settings, 'ld')
+    end
+  end
+
+  class Archive < Able::Rule
+
+    def build(input_paths, output_paths, settings)
+      executable = ENV['AR'] || settings[:ar] || @config[:ar]
+      arflags = [ENV['ARFLAGS']] | settings[:arflags] | @config[:arflags]
+      target = Array(output_paths).first
+      sh executable, *arflags, 'r', target, *Array(input_paths)
+    end
+  end
 end
 
 rule :ccobj, GCC::CCompileObj
 rule :cxxobj, GCC::CxxCompileObj
 rule :cc, GCC::CCompile
 rule :cxx, GCC::CxxCompile
+rule :clink, GCC::CLink
+rule :cxxlink, GCC::CxxLink
+rule :link, GCC::LdLink
+rule :ar, GCC::Archive
