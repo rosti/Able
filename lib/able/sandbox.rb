@@ -81,7 +81,15 @@ module Able
       @directory.config.add_option!(key, opts)
     end
 
-    def config_pairs(key, pairs)
+    def config_pairs(key, *options)
+      pairs = options.inject({}) do |product, arg|
+        if arg.instance_of?(Hash)
+          product.merge(arg)
+        else
+          product[arg] = nil
+          product
+        end
+      end
       @directory.config.add_pairs!(key, pairs)
     end
 
@@ -113,8 +121,8 @@ module Able
       config_options(:ldflags, flags)
     end
 
-    def defines(pairs)
-      config_pairs(:defines, pairs)
+    def defines(*options)
+      config_pairs(:defines, *options)
     end
   end
 end
