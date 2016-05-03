@@ -117,7 +117,7 @@ module Able
       config_options(:cxxflags, flags)
     end
 
-    def ldlags(*flags)
+    def ldflags(*flags)
       config_options(:ldflags, flags)
     end
 
