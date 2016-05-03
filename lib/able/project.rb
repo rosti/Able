@@ -18,7 +18,6 @@ module Able
       Logger.add_logger(ConsoleLogger)
 
       @root_dir = Directory.new('.', nil, self, @src_root, @dst_root)
-      @root_dir.load_buildable
     end
 
     def add_task(task)

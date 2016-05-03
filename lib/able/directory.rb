@@ -15,6 +15,8 @@ module Able
       @sandbox = BuildBox.new(self)
       @task = Task.new(project, Base::Mkpath.new(@config), [], [], [name], in_dir, out_dir, nil, nil)
       @project.add_task(@task)
+
+      load_buildable
     end
 
     def root_dir?
@@ -47,26 +49,8 @@ module Able
       @project.add_task(task)
     end
 
-    def load_buildable(build_able = 'build.able', &block)
-      build_able_path = @in_dir + build_able
-      build_able_contents = nil
-
-      begin
-        build_able_contents = File.read(build_able_path)
-      rescue
-      end
-
-      @sandbox.instance_eval(build_able_contents, build_able_path.to_s) if build_able_contents
-      @sandbox.instance_eval(&block) if block
-    end
-
     def add_subdir(name)
-      return if @subdirs[name]
-
-      subdir = Directory.new(name.to_s, self, @project, @in_dir, @out_dir)
-      subdir.load_buildable
-
-      @subdirs[name] = subdir
+      @subdirs[name] ||= Directory.new(name.to_s, self, @project, @in_dir, @out_dir)
     end
 
     def load_config(filename)
@@ -102,6 +86,11 @@ module Able
     end
 
     private
+
+    def load_buildable
+      build_able_path = @in_dir + 'build.able'
+      @sandbox.instance_eval(File.read(build_able_path), build_able_path.to_s) if File.readable?(build_able_path)
+    end
 
     def build_basic_rule(block)
       Class.new(Rule) { define_method(:build, block) }
