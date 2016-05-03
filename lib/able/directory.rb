@@ -25,10 +25,6 @@ module Able
       @rules[name.to_sym] = rule_class
     end
 
-    def build_basic_rule(block)
-      Class.new(Rule) { define_method(:build, block) }
-    end
-
     def add_basic_rule(name, block)
       add_rule(name, build_basic_rule(block))
     end
@@ -106,6 +102,10 @@ module Able
     end
 
     private
+
+    def build_basic_rule(block)
+      Class.new(Rule) { define_method(:build, block) }
+    end
 
     def fix_build_args(args)
       last_arg = args.last
