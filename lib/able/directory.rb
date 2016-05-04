@@ -1,7 +1,7 @@
 module Able
   # Deal with project directory, its tasks and etc.
   class Directory
-    attr_accessor :config
+    attr_accessor :config, :project, :in_dir, :out_dir, :task, :parent
 
     def initialize(name, parent, project, in_dir, out_dir)
       @name = name
@@ -13,7 +13,7 @@ module Able
       @rules = {}
       @config = Configuration.new(parent ? parent.config : nil)
       @sandbox = BuildBox.new(self)
-      @task = Task.new(project, Base::Mkpath.new(@config), [], [], [name], in_dir, out_dir, nil, nil)
+      @task = Task.new(self, Base::Mkpath.new(@config), [], [], [name], nil)
 
       load_buildable
     end
@@ -33,17 +33,14 @@ module Able
     def add_task(description, build_args, &block)
       flags, in_files, out_files = fix_build_args(build_args)
       rule = build_basic_rule(block).new(config)
-      Task.new(@project, rule,
-               flags, in_files, Array(out_files),
-               @in_dir, @out_dir, [@task], description)
+      Task.new(self, rule, flags, in_files, Array(out_files), description)
     end
 
     def add_build(description, rule, build_args)
       build_rule = find_rule(rule).new(config)
       flags, in_files, out_files = fix_build_args(build_args)
-      Task.new(@project, build_rule, flags, in_files,
-               Array(out_files || build_rule.make_output_files(in_files)),
-               @in_dir, @out_dir, [@task], description)
+      Task.new(self, build_rule, flags, in_files,
+               Array(out_files || build_rule.make_output_files(in_files)), description)
     end
 
     def add_subdir(name)

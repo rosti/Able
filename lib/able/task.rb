@@ -5,42 +5,40 @@ module Able
   class Task
     attr_reader :dependencies
 
-    def initialize(project, rule, flags, in_files, out_files, in_dir, out_dir, depends, description)
-      @project = project
+    def initialize(dir, rule, flags, in_files, out_files, description)
+      @dir = dir
       @rule = rule
       @flags = flags
       @input_files = in_files
       @output_files = out_files
-      @input_dir = in_dir
-      @output_dir = out_dir
       @description = description
-      @dependencies = Set.new(depends)
+      @dependencies = Set.new(dir.parent && [dir.parent.task])
       @executed = false
       @visited = false
 
-      @input_paths = @input_files.map { |file| @input_dir + file }
-      @output_paths = @output_files.map { |file| @output_dir + file }
+      @input_paths = @input_files.map { |file| @dir.in_dir + file }
+      @output_paths = @output_files.map { |file| @dir.out_dir + file }
       extra_input_paths = rule.extra_input_paths(@input_paths, @output_paths, @flags)
       extra_output_paths = rule.extra_output_paths(@input_paths, @output_paths, @flags)
       @input_paths += Array(extra_input_paths)
       @output_paths += Array(extra_output_paths)
 
-      project.add_task(self)
+      dir.project.add_task(self)
     end
 
     def dependencies=(new_deps)
       @dependencies |= new_deps.values
-      in_path_deps = new_deps.keys.map { |path| @project.src_root + path }
-      out_path_deps = new_deps.keys.map { |path| @project.dst_root + path }
+      in_path_deps = new_deps.keys.map { |path| @dir.project.src_root + path }
+      out_path_deps = new_deps.keys.map { |path| @dir.project.dst_root + path }
       @input_paths = (@input_paths - in_path_deps) + out_path_deps
     end
 
     def input_paths
-      canonize_paths(@input_paths, @project.src_root)
+      canonize_paths(@input_paths, @dir.project.src_root)
     end
 
     def output_paths
-      canonize_paths(@output_paths, @project.dst_root)
+      canonize_paths(@output_paths, @dir.project.dst_root)
     end
 
     def visited?
