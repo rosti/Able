@@ -5,7 +5,7 @@ module Able
   class Task
     attr_reader :dependencies
 
-    def initialize(dir, rule, flags, in_files, out_files, description)
+    def initialize(dir, rule, flags, in_files, out_files, description = nil)
       @dir = dir
       @rule = rule
       @flags = flags

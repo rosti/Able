@@ -13,7 +13,7 @@ module Able
       @rules = {}
       @config = Configuration.new(parent ? parent.config : nil)
       @sandbox = BuildBox.new(self)
-      @task = Task.new(self, Base::Mkpath.new(@config), [], [], [name], nil)
+      @task = Task.new(self, Base::Mkpath.new(@config), [], [], [name])
 
       load_buildable
     end
