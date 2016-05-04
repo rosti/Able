@@ -24,6 +24,8 @@ module Able
       extra_output_paths = rule.extra_output_paths(@input_paths, @output_paths, @flags)
       @input_paths += Array(extra_input_paths)
       @output_paths += Array(extra_output_paths)
+
+      project.add_task(self)
     end
 
     def dependencies=(new_deps)

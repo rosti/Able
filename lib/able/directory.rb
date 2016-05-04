@@ -14,7 +14,6 @@ module Able
       @config = Configuration.new(parent ? parent.config : nil)
       @sandbox = BuildBox.new(self)
       @task = Task.new(project, Base::Mkpath.new(@config), [], [], [name], in_dir, out_dir, nil, nil)
-      @project.add_task(@task)
 
       load_buildable
     end
@@ -34,19 +33,17 @@ module Able
     def add_task(description, build_args, &block)
       flags, in_files, out_files = fix_build_args(build_args)
       rule = build_basic_rule(block).new(config)
-      task = Task.new(@project, rule,
-                      flags, in_files, Array(out_files),
-                      @in_dir, @out_dir, [@task], description)
-      @project.add_task(task)
+      Task.new(@project, rule,
+               flags, in_files, Array(out_files),
+               @in_dir, @out_dir, [@task], description)
     end
 
     def add_build(description, rule, build_args)
       build_rule = find_rule(rule).new(config)
       flags, in_files, out_files = fix_build_args(build_args)
-      task = Task.new(@project, build_rule, flags, in_files,
-                      Array(out_files || build_rule.make_output_files(in_files)),
-                      @in_dir, @out_dir, [@task], description)
-      @project.add_task(task)
+      Task.new(@project, build_rule, flags, in_files,
+               Array(out_files || build_rule.make_output_files(in_files)),
+               @in_dir, @out_dir, [@task], description)
     end
 
     def add_subdir(name)
