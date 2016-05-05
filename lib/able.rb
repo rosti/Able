@@ -5,6 +5,7 @@ require 'able/sandbox.rb'
 require 'able/logger.rb'
 require 'able/project.rb'
 require 'able/rule.rb'
+require 'able/task_params.rb'
 require 'able/directory.rb'
 require 'able/task.rb'
 

@@ -44,10 +44,10 @@ module GCC
       @config = config
     end
 
-    def build(input_paths, output_paths, settings)
-      target = Array(output_paths).first
-      sh executable(settings), *flags(settings, target), '-o', target,
-         *filter_inputs(Array(input_paths)), *link_libs(settings)
+    def build(params)
+      target = params.output_paths.first
+      sh executable(params.settings), *flags(params.settings, target), '-o', target,
+         *filter_inputs(params.input_paths), *link_libs(params.settings)
     end
 
     def link_libs(_settings)
@@ -87,13 +87,13 @@ module GCC
       end
     end
 
-    def extra_input_paths(input_paths, output_paths, flags)
-      depfile = Pathname.new(dep_file(output_paths.first))
+    def extra_input_paths(params)
+      depfile = Pathname.new(dep_file(params.output_paths.first))
       File.read(depfile).scan(/^[[:print:]]*\:$/).map { |path| path.chop } if depfile.file?
     end
 
-    def extra_output_paths(input_paths, output_paths, flags)
-      Pathname.new(dep_file(output_paths.first))
+    def extra_output_paths(params)
+      Pathname.new(dep_file(params.output_paths.first))
     end
 
     def dep_file(target)
@@ -166,11 +166,11 @@ module GCC
 
   class Archive < Able::Rule
 
-    def build(input_paths, output_paths, settings)
-      executable = ENV['AR'] || settings[:ar] || @config[:ar]
-      arflags = [ENV['ARFLAGS']] | settings[:arflags] | @config[:arflags]
-      target = Array(output_paths).first
-      sh executable, *arflags, 'r', target, *Array(input_paths)
+    def build(params)
+      executable = ENV['AR'] || params.settings[:ar] || @config[:ar]
+      arflags = [ENV['ARFLAGS']] | params.settings[:arflags] | @config[:arflags]
+      target = params.output_paths.first
+      sh executable, *arflags, 'r', target, params.input_paths
     end
   end
 end

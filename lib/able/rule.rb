@@ -11,20 +11,20 @@ module Able
       @config = config
     end
 
-    def build(_input_paths, _output_paths, _settings) end
+    def build(_params) end
 
-    def description(_input_paths, _output_paths, _settings) end
+    def description(_params) end
 
     def make_output_files(_input_paths) end
 
-    def extra_input_paths(_input_paths, _output_paths, _settings) end
+    def extra_input_paths(_params) end
 
-    def extra_output_paths(_input_paths, _output_paths, _settings) end
+    def extra_output_paths(_params) end
 
-    def clean(_input_paths, output_paths, settings)
-      return if settings.include?(:no_clean)
+    def clean(params)
+      return if params.settings.include?(:no_clean)
 
-      file_paths = output_paths.select do |path|
+      file_paths = params.output_paths.select do |path|
         File.exist?(path) && !File.directory?(path)
       end
 
@@ -36,8 +36,12 @@ module Able
   module Base
     # simple make path rule
     class Mkpath < Rule
-      def build(_in_paths, out_paths, _settings)
-        out_paths.each { |path| FileUtils.mkpath(path) }
+      def self.setup(dir)
+
+      end
+
+      def build(params)
+        params.output_paths.each { |path| FileUtils.mkpath(path) }
       end
     end
   end

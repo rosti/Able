@@ -13,8 +13,8 @@ module Able
       @rules = {}
       @config = Configuration.new(parent ? parent.config : nil)
       @sandbox = BuildBox.new(self)
-      @task = Task.new(self, Base::Mkpath.new(@config), [], [], [name])
 
+      setup_task
       load_buildable
     end
 
@@ -31,16 +31,16 @@ module Able
     end
 
     def add_task(description, build_args, &block)
-      flags, in_files, out_files = fix_build_args(build_args)
       rule = build_basic_rule(block).new(config)
-      Task.new(self, rule, flags, in_files, Array(out_files), description)
+      params = Task::Params.new(build_args)
+      Task.new(self, rule, params, description)
     end
 
     def add_build(description, rule, build_args)
       build_rule = find_rule(rule).new(config)
-      flags, in_files, out_files = fix_build_args(build_args)
-      Task.new(self, build_rule, flags, in_files,
-               Array(out_files || build_rule.make_output_files(in_files)), description)
+      params = Task::Params.new(build_args)
+      params.output_paths += build_rule.make_output_files(params.input_paths) if params.output_paths.empty?
+      Task.new(self, build_rule, params, description)
     end
 
     def add_subdir(name)
@@ -81,6 +81,12 @@ module Able
 
     private
 
+    def setup_task
+      task_params = Task::Params.new([])
+      task_params.output_paths += [@name]
+      @task = Task.new(self, Base::Mkpath.new(config), task_params)
+    end
+
     def load_buildable
       build_able_path = @in_dir + 'build.able'
       @sandbox.instance_eval(File.read(build_able_path), build_able_path.to_s) if File.readable?(build_able_path)
@@ -88,28 +94,6 @@ module Able
 
     def build_basic_rule(block)
       Class.new(Rule) { define_method(:build, block) }
-    end
-
-    def fix_build_args(args)
-      last_arg = args.last
-      in_files, out_files = nil, nil
-      extra_opts = {}
-
-      if last_arg.is_a? Hash
-        in_files = last_arg.delete(:input)
-        out_files = last_arg.delete(:output)
-        unless in_files or out_files
-          in_files = last_arg.keys.last
-          out_files = last_arg.delete(in_files)
-        end
-        extra_opts = last_arg
-      else
-        in_files = last_arg
-      end
-
-      hashes = args[0...-1].select { |opt| opt.is_a?(Hash) }.inject({}) { |a, b| a.merge(b) }
-      flags = args[0...-1].select { |opt| not opt.is_a?(Hash) }.map { |opt| [opt, true] }.to_h
-      return flags.merge(hashes).merge(extra_opts), Array(in_files), out_files
     end
   end
 end

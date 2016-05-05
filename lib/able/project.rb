@@ -21,7 +21,7 @@ module Able
     end
 
     def add_task(task)
-      task.output_paths.map(&:to_s).each do |target|
+      task.params.output_paths.map(&:to_s).each do |target|
         if @all_tasks[target]
           fail "Task '#{task}' is duplicting task '#{@all_tasks[target]}' for target '#{target}'"
         end
@@ -70,7 +70,7 @@ module Able
 
       while index < tasks_queue.count
         task = tasks_queue[index]
-        in_paths = task.input_paths.map(&:to_s)
+        in_paths = task.params.input_paths.map(&:to_s)
         depends = @all_tasks.select { |path, _| in_paths.include?(path) }
         task.dependencies = depends
         tasks_queue |= task.dependencies.select { |tsk| !tsk.visited? }
