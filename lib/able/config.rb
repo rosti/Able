@@ -12,7 +12,16 @@ module Able
       self[key] = Array(self[key]) | Array(value)
     end
 
-    def add_pairs!(key, pairs)
+    def add_pairs!(key, options)
+      pairs = options.inject({}) do |product, arg|
+        if arg.is_a?(Hash)
+          product.merge(arg)
+        else
+          product[arg] = true
+          product
+        end
+      end
+
       self[key] = Hash(self[key]).merge(pairs)
     end
 

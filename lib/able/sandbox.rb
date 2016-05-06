@@ -82,15 +82,7 @@ module Able
     end
 
     def config_pairs(key, *options)
-      pairs = options.inject({}) do |product, arg|
-        if arg.instance_of?(Hash)
-          product.merge(arg)
-        else
-          product[arg] = nil
-          product
-        end
-      end
-      @directory.config.add_pairs!(key, pairs)
+      @directory.config.add_pairs!(key, options)
     end
 
     def include_dir(*dir)
