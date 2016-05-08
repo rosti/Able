@@ -84,29 +84,24 @@ module Able
     def build_queue(tasks_array)
       tasks_queue = Queue.new
       tasks_array.each { |task| tasks_queue.push(task) }
-      continue_work = Atomic.new(true)
       thread_handles = []
+      Thread.abort_on_exception = true
       @threads.times do
         thread_handles << Thread.new do
-          begin
-            while continue_work.get
-              task = nil
-              begin
-                task = tasks_queue.pop(true)
-              rescue
-              end
-
-              break unless task
-
-              if task.executable?
-                task.execute
-              else
-                tasks_queue.push(task)
-              end
+          while true
+            task = nil
+            begin
+              task = tasks_queue.pop(true)
+            rescue
             end
-          rescue Exception => ex
-            continue_work.set(false)
-            Logger.error(ex.to_s + "\n" + ex.backtrace.join("\n"))
+
+            break unless task
+
+            if task.executable?
+              task.execute
+            else
+              tasks_queue.push(task)
+            end
           end
         end
       end
