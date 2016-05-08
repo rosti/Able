@@ -85,32 +85,32 @@ module Able
       @directory.config.add_pairs!(key, options)
     end
 
-    def include_dir(*dir)
-      config_options(:inc_dirs, dir)
+    def include_dir(*dirs)
+      config_options(:inc_dirs, *dirs)
     end
 
-    def include_file(*file)
-      config_options(:inc_files, file)
+    def include_file(*files)
+      config_options(:inc_files, *files)
     end
 
-    def lib_dir(*dir)
-      config_options(:lib_dirs, dir)
+    def lib_dir(*dirs)
+      config_options(:lib_dirs, *dirs)
     end
 
-    def link_lib(*library)
-      config_options(:link_libs, library)
+    def link_lib(*libraries)
+      config_options(:link_libs, *libraries)
     end
 
     def cflags(*flags)
-      config_options(:cflags, flags)
+      config_options(:cflags, *flags)
     end
 
     def cxxflags(*flags)
-      config_options(:cxxflags, flags)
+      config_options(:cxxflags, *flags)
     end
 
     def ldflags(*flags)
-      config_options(:ldflags, flags)
+      config_options(:ldflags, *flags)
     end
 
     def defines(*options)
