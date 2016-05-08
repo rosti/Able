@@ -1,22 +1,17 @@
-require 'set'
-require 'thread'
-
 module Able
   ##
   # A module that handles logging
   #
   module Logger
-    @@loggers = Set.new
-    @@mutex = Mutex.new
+    @@loggers = []
 
     def self.add_logger(logger)
       @@loggers << logger
     end
 
-    def self.call_log_method(meth, *args, &block)
-      @@mutex.synchronize do
-        loggers = @@loggers.select { |logger| logger.methods.include? meth }
-        loggers.each { |logger| logger.send meth, *args, &block }
+    def self.log(severity, *args)
+      unless severity == :verbose and not($verbose or ENV['V'].to_i == 1)
+        @@loggers.each { |logger| logger.log(severity, args) }
       end
     end
 
@@ -24,19 +19,19 @@ module Able
     # Log arguments
     #
     def self.verb(*args)
-      call_log_method :verb, *args if $verbose or ENV['V'].to_i == 1
+      log :verbose, *args
     end
 
     def self.info(*args)
-      call_log_method :info, *args
+      log :info, *args
     end
 
     def self.warn(*args)
-      call_log_method :warn, *args
+      log :warning, *args
     end
 
     def self.error(*args)
-      call_log_method :error, *args
+      log :error, *args
     end
   end
 end

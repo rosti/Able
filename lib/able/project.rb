@@ -15,7 +15,7 @@ module Able
       @src_root = Pathname.new(args[:src_root] || '.')
       @dst_root = Pathname.new(args[:dst_root] || '.')
 
-      Logger.add_logger(ConsoleLogger)
+      Logger.add_logger(ConsoleLogger.new)
 
       @root_dir = Directory.new('.', nil, self, @src_root, @dst_root)
     end
