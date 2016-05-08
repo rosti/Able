@@ -9,14 +9,8 @@ module Able
       cmdline = args.map(&:to_s).join ' '
       output, status = Open3.capture2e cmdline
 
-      if status.exitstatus != 0
-        Logger.error cmdline
-        Logger.error output
-        fail "Command failed with status #{status.exitstatus}"
-      else
-        Logger.verb cmdline
-        Logger.verb output
-      end
+      Logger.log(status.exitstatus != 0 ? :error: :verbose, cmdline+"\n"+output)
+      fail "Command failed with status #{status.exitstatus}" if status.exitstatus != 0
     end
   end
 end
