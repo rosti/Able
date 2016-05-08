@@ -1,5 +1,4 @@
 require 'able/common.rb'
-require 'able/atomic.rb'
 require 'able/config.rb'
 require 'able/sandbox.rb'
 require 'able/logger.rb'
