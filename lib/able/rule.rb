@@ -36,9 +36,6 @@ module Able
   module Base
     # simple make path rule
     class Mkpath < Rule
-      def self.setup(dir)
-
-      end
 
       def build(params)
         params.output_paths.each { |path| FileUtils.mkpath(path) }
