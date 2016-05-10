@@ -48,23 +48,23 @@ module Able
     end
 
     def build_target(target = nil)
-      target = @default_target unless target
+      target_path = (dst_root+(target||default_target)).to_s
 
-      fail "No task '#{target}', nothing to do!" unless @all_tasks[target]
+      fail "No task '#{target_path}', nothing to do!" unless @all_tasks[target_path]
 
-      build_queue(prepare_queue(target))
+      build_queue(prepare_queue(target_path))
     end
 
     def clean(target = nil)
       clean_targets = @all_tasks.values
-      clean_targets = prepare_queue(target) if target
+      clean_targets = prepare_queue((dst_root+target).to_s) if target
       clean_targets.each(&:clean)
     end
 
     private
 
-    def prepare_queue(target)
-      tasks_queue = [@all_tasks[target]]
+    def prepare_queue(target_path)
+      tasks_queue = [@all_tasks[target_path]]
       tasks_queue[0].visit
       index = 0
 
