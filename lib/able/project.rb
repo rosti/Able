@@ -70,7 +70,7 @@ module Able
 
       while index < tasks_queue.count
         task = tasks_queue[index]
-        in_paths = task.params.input_paths.map(&:to_s)
+        in_paths = task.params.retarget_input_paths(src_root, dst_root).map(&:to_s)
         depends = @all_tasks.select { |path, _| in_paths.include?(path) }
         task.dependencies = depends
         tasks_queue |= task.dependencies.select { |tsk| !tsk.visited? }

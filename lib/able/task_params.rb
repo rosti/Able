@@ -35,12 +35,14 @@ module Able
         prepend_path!(:@output_paths, path_prefix)
       end
 
-      def canonic_input_paths(path_prefix)
-        canonize_paths(input_paths, path_prefix)
-      end
-
-      def canonic_output_paths(path_prefix)
-        canonize_paths(output_paths, path_prefix)
+      def retarget_input_paths(old_prefix, new_prefix)
+        input_paths.map do |input_path|
+          begin
+            new_prefix + input_path.relative_path_from(old_prefix)
+          rescue ArgumentError
+            input_path
+          end
+        end
       end
 
       private
