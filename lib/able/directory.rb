@@ -84,7 +84,7 @@ module Able
     def setup_task
       task_params = Task::Params.new([])
       task_params.output_paths += [@name]
-      @task = Task.new(self, Base::Mkpath.new(config), task_params)
+      @task = Task.new(parent || self, Base::Mkpath.new(config), task_params)
     end
 
     def load_buildable

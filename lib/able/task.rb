@@ -10,7 +10,7 @@ module Able
       @rule = rule
       @params = params
       @description = description
-      @dependencies = Set.new(dir.parent && [dir.parent.task])
+      @dependencies = Set.new(dir.task && [dir.task])
       @executed = false
       @visited = false
 
