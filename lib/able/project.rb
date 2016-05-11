@@ -1,4 +1,3 @@
-require 'set'
 require 'thread'
 require 'pathname'
 
@@ -61,20 +60,22 @@ module Able
       clean_targets.each(&:clean)
     end
 
+    def tasks_by_output(output_paths)
+      output_paths.map { |path| [path, @all_tasks[path]] }.select { |a| a[1] }.to_h
+    end
+
     private
 
     def prepare_queue(target_path)
       tasks_queue = [@all_tasks[target_path]]
-      tasks_queue[0].visit
+      tasks_queue[0].visit!
       index = 0
 
       while index < tasks_queue.count
         task = tasks_queue[index]
-        in_paths = task.params.retarget_input_paths(src_root, dst_root).map(&:to_s)
-        depends = @all_tasks.select { |path, _| in_paths.include?(path) }
-        task.dependencies = depends
-        tasks_queue |= task.dependencies.select { |tsk| !tsk.visited? }
-        task.dependencies.each(&:visit)
+        depends = task.setup_depends!.select(&:not_visited?)
+        tasks_queue |= depends
+        depends.each(&:visit!)
         index += 1
       end
 
