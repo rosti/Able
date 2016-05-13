@@ -63,7 +63,11 @@ module Able
     end
 
     def tasks_by_output(output_paths)
-      output_paths.map { |path| [path, @all_tasks[path]] }.select { |a| a[1] }.to_h
+      output_paths.inject({}) do |all, path|
+        task = @all_tasks[path]
+        all[path] = task if task
+        all
+      end
     end
 
     private
