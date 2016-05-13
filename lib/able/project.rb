@@ -85,23 +85,19 @@ module Able
         index += 1
       end
 
-      tasks_queue.reverse
+      tasks_queue
     end
 
     def build_thread(tasks_queue)
       not_ready = []
       loop do
-        task = nil
         @task_completed.reset
-        begin
-          task = tasks_queue.pop(true)
-        rescue ThreadError => _
-        end
+        task = tasks_queue.pop
 
         unless task
           break if not_ready.empty?
 
-          not_ready.each { |t| tasks_queue.push(t) }
+          tasks_queue.unshift(*not_ready.reverse)
           not_ready.clear
           @task_completed.wait
           next
@@ -117,8 +113,7 @@ module Able
 
     def build_queue(tasks_array)
       Thread.abort_on_exception = true
-      tasks_queue = Queue.new
-      tasks_array.each { |task| tasks_queue.push(task) }
+      tasks_queue = Concurrent::Array.new(tasks_array)
       thread_handles = []
       @threads.times do
         thread_handles << Thread.new { build_thread(tasks_queue) }
