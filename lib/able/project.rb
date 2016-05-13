@@ -70,6 +70,10 @@ module Able
       end
     end
 
+    def task_executed!
+      @task_completed.set
+    end
+
     private
 
     def prepare_queue(target_path)
