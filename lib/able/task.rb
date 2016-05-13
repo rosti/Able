@@ -18,8 +18,8 @@ module Able
       params.prepend_output_path!(dir.out_dir)
       extra_input_paths = rule.extra_input_paths(params)
       extra_output_paths = rule.extra_output_paths(params)
-      params.input_paths += Array(extra_input_paths)
-      params.output_paths += Array(extra_output_paths)
+      params.input_paths += Array(extra_input_paths).map { |p| Pathname.new(p) }
+      params.output_paths += Array(extra_output_paths).map { |p| Pathname.new(p) }
 
       dir.project.add_task(self)
     end
