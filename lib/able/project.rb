@@ -1,4 +1,5 @@
 require 'thread'
+require 'concurrent'
 require 'pathname'
 
 module Able
@@ -16,6 +17,7 @@ module Able
 
       Logger.add_logger(ConsoleLogger.new)
 
+      @task_completed = Concurrent::Event.new
       @root_dir = Directory.new('.', nil, self, @src_root, @dst_root)
     end
 
@@ -82,29 +84,40 @@ module Able
       tasks_queue.reverse
     end
 
+    def build_thread(tasks_queue)
+      not_ready = []
+      loop do
+        task = nil
+        @task_completed.reset
+        begin
+          task = tasks_queue.pop(true)
+        rescue ThreadError => _
+        end
+
+        unless task
+          break if not_ready.empty?
+
+          not_ready.each { |t| tasks_queue.push(t) }
+          not_ready.clear
+          @task_completed.wait
+          next
+        end
+
+        if task.executable?
+          task.execute
+        else
+          not_ready <<= task
+        end
+      end
+    end
+
     def build_queue(tasks_array)
+      Thread.abort_on_exception = true
       tasks_queue = Queue.new
       tasks_array.each { |task| tasks_queue.push(task) }
       thread_handles = []
-      Thread.abort_on_exception = true
       @threads.times do
-        thread_handles << Thread.new do
-          while true
-            task = nil
-            begin
-              task = tasks_queue.pop(true)
-            rescue
-            end
-
-            break unless task
-
-            if task.executable?
-              task.execute
-            else
-              tasks_queue.push(task)
-            end
-          end
-        end
+        thread_handles << Thread.new { build_thread(tasks_queue) }
       end
 
       thread_handles.each(&:join)

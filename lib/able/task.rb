@@ -68,6 +68,7 @@ module Able
       end
 
       @dependents.each(&:notify_ready!)
+      @dir.project.task_executed!
     end
 
     def executable?
