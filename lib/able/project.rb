@@ -17,7 +17,8 @@ module Able
 
       Logger.add_logger(ConsoleLogger.new)
 
-      @task_completed = Concurrent::Event.new
+      @build_loop_lock = Mutex.new
+      @task_completed = ConditionVariable.new
       @root_dir = Directory.new('.', nil, self, @src_root, @dst_root)
     end
 
@@ -71,7 +72,7 @@ module Able
     end
 
     def task_executed!
-      @task_completed.set
+      @task_completed.broadcast
     end
 
     private
@@ -89,35 +90,32 @@ module Able
         index += 1
       end
 
-      tasks_queue
+      tasks_queue.reverse
     end
 
-    def build_thread(tasks_queue)
-      not_ready = []
-      loop do
-        @task_completed.reset
-        task = tasks_queue.pop
+    def pop_executable_task(tasks_queue)
+      @build_loop_lock.synchronize do
+        loop do
+          return if tasks_queue.empty?
 
-        unless task
-          break if not_ready.empty?
+          task_pos = tasks_queue.find_index(&:executable?)
+          return tasks_queue.delete_at(task_pos) if task_pos
 
-          tasks_queue.unshift(*not_ready.reverse)
-          not_ready.clear
-          @task_completed.wait
-          next
-        end
-
-        if task.executable?
-          task.execute
-        else
-          not_ready <<= task
+          @task_completed.wait(@build_loop_lock) if @threads > 1
         end
       end
     end
 
-    def build_queue(tasks_array)
+    def build_thread(tasks_queue)
+      loop do
+        task = pop_executable_task(tasks_queue)
+        break unless task
+        task.execute
+      end
+    end
+
+    def build_queue(tasks_queue)
       Thread.abort_on_exception = true
-      tasks_queue = Concurrent::Array.new(tasks_array)
       thread_handles = []
       @threads.times do
         thread_handles << Thread.new { build_thread(tasks_queue) }
