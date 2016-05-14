@@ -173,13 +173,17 @@ module GCC
       sh executable, *arflags, 'r', target, params.input_paths
     end
   end
+
+  RULES = {
+      ccobj: CCompileObj,
+      cxxobj: CxxCompileObj,
+      cc: CCompile,
+      cxx: CxxCompile,
+      clink: CLink,
+      cxxlink: CxxLink,
+      link: LdLink,
+      ar: Archive,
+  }
 end
 
-rule :ccobj, GCC::CCompileObj
-rule :cxxobj, GCC::CxxCompileObj
-rule :cc, GCC::CCompile
-rule :cxx, GCC::CxxCompile
-rule :clink, GCC::CLink
-rule :cxxlink, GCC::CxxLink
-rule :link, GCC::LdLink
-rule :ar, GCC::Archive
+GCC::RULES.each { |name, handler| rule(name, handler) }
