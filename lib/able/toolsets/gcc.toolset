@@ -2,7 +2,7 @@ require 'pathname'
 
 module GCC
 
-  HEADER_EXTS = [".h", ".hh", ".hp", ".hxx", ".hpp", ".h++", ".tcc"]
+  HEADER_EXTS = %w{.h .hh .hp .hxx .hpp .h++ .tcc}
 
   module LinkLibraries
 
@@ -97,7 +97,7 @@ module GCC
     end
 
     def dep_file(target)
-      target.to_s + ".d"
+      target.to_s + '.d'
     end
 
     def build_flags(symbol, settings, target)
@@ -111,7 +111,7 @@ module GCC
   class CompileObj < CompilerBase
 
     def make_output_files(input_files)
-      input_files.map { |f| f + ".o" }
+      input_files.map { |f| f + '.o' }
     end
 
     def build_flags(symbol, settings, target)
