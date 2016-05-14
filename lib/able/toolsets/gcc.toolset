@@ -89,7 +89,7 @@ module GCC
 
     def extra_input_paths(params)
       depfile = dep_file(params.output_paths.first)
-      File.read(depfile).scan(/^[[:print:]]*:$/).map { |path| path.chop } if File.file?(depfile)
+      File.read(depfile).scan(/^[[:print:]]*:$/).map(&:chop) if File.file?(depfile)
     end
 
     def extra_output_paths(params)
