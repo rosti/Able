@@ -93,7 +93,7 @@ module GCC
     end
 
     def extra_output_paths(params)
-      Pathname.new(dep_file(params.output_paths.first))
+      dep_file(params.output_paths.first)
     end
 
     def dep_file(target)
