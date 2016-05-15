@@ -24,11 +24,9 @@ module Able
     def clean(params)
       return if params.settings.include?(:no_clean)
 
-      file_paths = params.output_paths.select do |path|
-        File.exist?(path) && !File.directory?(path)
+      params.output_paths.each do |path|
+        File.delete(path) if File.file?(path)
       end
-
-      File.delete(*file_paths) unless file_paths.empty?
     end
   end
 
