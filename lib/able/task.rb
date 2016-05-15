@@ -46,14 +46,12 @@ module Able
     end
 
     def description
-      desc = @description || @rule.description(params)
-      desc = "Building: #{params.input_paths.map(&:to_s)} => #{params.output_paths.map(&:to_s)}" unless desc
-      desc
+      @description || @rule.description(params) || params.output_paths.join(' ')
     end
 
     def execute
       if need_execution?
-        Logger.info(description)
+        Logger.info("Building: #{description}")
         @rule.build(params)
       end
 
@@ -66,7 +64,7 @@ module Able
     end
 
     def clean
-      Logger.info("Cleaning: #{params.output_paths.map(&:to_s)}")
+      Logger.info("Cleaning: #{description}")
       @rule.clean(params)
     end
 
