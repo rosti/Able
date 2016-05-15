@@ -58,7 +58,7 @@ module Able
     end
 
     def logger(name)
-      @directory.load_logger(name)
+      Logger.load_logger(name)
     end
 
     def default(target)

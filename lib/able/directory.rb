@@ -55,10 +55,6 @@ module Able
       ToolBox.new(self, @project.get_path(@in_dir, "#{name}.toolset", :toolsets))
     end
 
-    def load_logger(logger)
-      @project.load_logger(logger)
-    end
-
     def project_targets
       @project.all_tasks.keys
     end

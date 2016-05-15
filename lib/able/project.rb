@@ -45,10 +45,6 @@ module Able
       path
     end
 
-    def load_logger(name)
-      Logger.add_logger(name)
-    end
-
     def build_target(target = nil)
       target_path = (dst_root+(target||default_target)).to_s
 
