@@ -56,7 +56,7 @@ module Able
     def clean(target = nil)
       clean_targets = @all_tasks.values
       clean_targets = prepare_queue((dst_root+target).to_s) if target
-      clean_targets.each(&:clean)
+      clean_targets.uniq.each(&:clean)
     end
 
     def tasks_by_output(output_paths)
