@@ -45,18 +45,12 @@ module Able
       path
     end
 
-    def build_target(target = nil)
-      target_path = (dst_root+(target||default_target)).to_s
-
-      fail "No task '#{target_path}', nothing to do!" unless @all_tasks[target_path]
-
-      build_queue(prepare_queue(target_path))
+    def build(target)
+      build_queue(prepare_queue(dst_root+target))
     end
 
-    def clean(target = nil)
-      clean_targets = @all_tasks.values
-      clean_targets = prepare_queue((dst_root+target).to_s) if target
-      clean_targets.uniq.each(&:clean)
+    def clean(target)
+      prepare_queue(dst_root+target).each(&:clean)
     end
 
     def tasks_by_output(output_paths)
@@ -74,8 +68,11 @@ module Able
     private
 
     def prepare_queue(target_path)
-      tasks_queue = [@all_tasks[target_path]]
-      tasks_queue[0].visit!
+      target_task = @all_tasks[target_path.to_s]
+      fail "No task '#{target_path}', nothing to do!" unless target_task
+
+      tasks_queue = [target_task]
+      target_task.visit!
       index = 0
 
       while index < tasks_queue.count

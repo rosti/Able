@@ -34,12 +34,12 @@ handle_target = lambda do |target|
   if clean_project
     project.clean(target)
   else
-    project.build_target(target)
+    project.build(target)
   end
 end
 
-if ARGV && !ARGV.empty?
-  ARGV.each(&handle_target)
+if Array(ARGV).empty?
+  handle_target.call(project.default_target)
 else
-  handle_target.call(nil)
+  ARGV.each(&handle_target)
 end
