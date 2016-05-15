@@ -7,7 +7,8 @@ module Able
       attr_reader :settings
       attr_accessor :input_paths, :output_paths
 
-      def initialize(args)
+      def initialize(dir, args)
+        @dir = dir
         @settings = {}
 
         # First separate settings from the rest of the arguments
@@ -27,38 +28,18 @@ module Able
         @output_paths = in_key.map { |key| merged_hash[key] }
       end
 
-      def prepend_input_path!(path_prefix)
-        prepend_path!(:@input_paths, path_prefix)
+      def build_input_paths
+        prepend_paths(@input_paths, @dir.out_dir)
       end
 
-      def prepend_output_path!(path_prefix)
-        prepend_path!(:@output_paths, path_prefix)
-      end
-
-      def retarget_input_paths(old_prefix, new_prefix)
-        input_paths.map do |input_path|
-          begin
-            new_prefix + input_path.relative_path_from(old_prefix)
-          rescue ArgumentError
-            input_path
-          end
-        end
+      def build_output_paths
+        prepend_paths(@output_paths, @dir.in_dir)
       end
 
       private
 
-      def prepend_path!(target, path_prefix)
-        instance_variable_get(target).map! { |file| path_prefix + file }
-      end
-
-      def canonize_paths(paths, base)
-        paths.map do |path|
-          begin
-            path.relative_path_from(base)
-          rescue
-            path
-          end
-        end
+      def prepend_paths(sub_paths, path_prefix)
+        sub_paths.map { |sub_path| (path_prefix+sub_path).to_s }
       end
     end
   end

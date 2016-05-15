@@ -32,13 +32,13 @@ module Able
 
     def add_task(description, build_args, &block)
       rule = build_basic_rule(block).new(config)
-      params = Task::Params.new(build_args)
+      params = Task::Params.new(self, build_args)
       Task.new(self, rule, params, description)
     end
 
     def add_build(description, rule, build_args)
       build_rule = find_rule(rule).new(config)
-      params = Task::Params.new(build_args)
+      params = Task::Params.new(self, build_args)
       params.output_paths += build_rule.make_output_files(params.input_paths) if params.output_paths.empty?
       Task.new(self, build_rule, params, description)
     end
@@ -82,7 +82,7 @@ module Able
     private
 
     def setup_task
-      task_params = Task::Params.new([])
+      task_params = Task::Params.new(self, [])
       task_params.output_paths += [@name]
       @task = Task.new(parent || self, Base::Mkpath.new(config), task_params)
     end

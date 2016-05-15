@@ -14,13 +14,7 @@ module Able
       @wait_count = Concurrent::AtomicFixnum.new
       @visited = false
 
-      params.prepend_input_path!(dir.in_dir)
-      params.prepend_output_path!(dir.out_dir)
-      extra_input_paths = rule.extra_input_paths(params)
-      extra_output_paths = rule.extra_output_paths(params)
-      params.input_paths += Array(extra_input_paths).map { |p| Pathname.new(p) }
-      params.output_paths += Array(extra_output_paths).map { |p| Pathname.new(p) }
-
+      setup_task_paths
       dir.project.add_task(self)
     end
 
@@ -33,13 +27,9 @@ module Able
     end
 
     def setup_depends!
-      project = @dir.project
-      src_root = project.src_root
-      dst_root = project.dst_root
-      depends = project.tasks_by_output(params.retarget_input_paths(src_root, dst_root).map(&:to_s))
+      depends = @dir.project.tasks_by_output(params.build_input_paths)
 
-      params.input_paths -= depends.keys.map { |path| src_root + path }
-      params.input_paths += depends.keys.map { |path| dst_root + path }
+      params.input_paths.map! { |in_path| (depends[in_path]?@dir.out_dir():@dir.in_dir())+in_path }
 
       depend_tasks = depends.values
       depend_tasks <<= @dir.task unless @dir.task.equal?(self)
@@ -81,6 +71,14 @@ module Able
     end
 
     private
+
+    def setup_task_paths
+      extra_input_paths = @rule.extra_input_paths(@params)
+      extra_output_paths = @rule.extra_output_paths(@params)
+      @params.input_paths += Array(extra_input_paths)
+      @params.output_paths += Array(extra_output_paths)
+      @params.output_paths.map! { |out_path| @dir.out_dir + out_path }
+    end
 
     def need_execution?
       params.output_paths.each do |op|

@@ -88,12 +88,12 @@ module GCC
     end
 
     def extra_input_paths(params)
-      depfile = dep_file(params.output_paths.first)
+      depfile = dep_file(params.build_output_paths.first)
       File.read(depfile).scan(/^[[:print:]]*:$/).map(&:chop) if File.file?(depfile)
     end
 
     def extra_output_paths(params)
-      dep_file(params.output_paths.first)
+      dep_file(params.build_output_paths.first)
     end
 
     def dep_file(target)
